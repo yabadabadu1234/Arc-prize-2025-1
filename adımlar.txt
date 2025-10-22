@@ -1,0 +1,128 @@
+ANA HATLARIYLA TAKİP EDİLECEK SİSTEM✅:
+(Eğitim dosyalarında tekrar eden bulmacaların kontrolü yapılacak ve fazlalıklar silinecek, burası notebook oluşturmadan evvel yapılacak, yarışmaya gönderirken bu aşamaya gerek olmayacak.)
+1- Ana bulmaca dosyası her ana bulmaca ayrı klasörde olup her klasör tek bulmacanın girdi, çıktı ve testlerini ihtiva edecek şekilde düzenlenecek.
+
+3-Bulmaca,numpy matrisi yazdıracak şekilde py dosyasına,satır-sütun her ikisinin de dizilerini bütün olarak görmeyi sağlayan yeni json formatına ve png'ye çevrilecek.(ilk bulmacaları çevirmek için olan hücreler hazırlandı, üretilenler sonradan çevrilecek)
+
+
+
+5- Bulmacalar çözülmeye başlanacaktır. Embeddingci Rag'a kaydedilecek her şeyi vektörleştirir. 2 motor vardır. Birisi kod kombinasyoncusu, biri ihtimal hesapçısı. kodcu olan motor belli gramerlere, llm tarafından ifade edilecek kısıtlamalara göre kod kombinasyonları üretir. Her ürettiği kod bir formüle göre puanlanır. Fazla puan alan kodlara benzer kodlar daha çok üretilir. (formül daha sonra söylenecektir) ihtimal motoru ise farklı matris kombinasyonları üreten, her türlü durumu ihtimaller ile belirtmeye yarayan çok fonksiyonlu bir cihazdır. Mesela değişim tipleri adlı kümede 5 eleman varsa rag tablosuna doldurulacak tiplerin tekli, çiftli, 2'den çok çeşitleri vardır. Bu motor toplam ihtimal sayısını, her bir elemanın yerleşme ihtimalini hesaplar. Lakin salt bir ihtimal hesabı değildir, bazı elemanlar kesinlikle olmayacak olabilir. Bu yüzden katsayıları llm tarafından belirlenecek umumi bir fonksiyon yazılır.2 elemanımız daha vardır:1-qwen 3 embedding 4B (RAG için) 2-qwen3 vl-8B-thinking(ana çözücü) Bu model batch'ler halinde kullanılacaktır. Her batch farklı bir vazifelidir. Vazifeler: Ana çözücü, haberci, münekkit, müeddib, ihtimalci, kodcu, kaynak idarecisi. 
+6- Çözücü bulmacadan çıkarttığı özellikleri sql tablosuna kaydeder.
+7- Bu özellikleri çıkartırkenki mesnetlerini zikreder.
+8- mesnetleri
+12-Dsl kural havuzundan veya kendi istediği kod parçalarıyla kuralı oluşturan fonksiyonu(sadece onu, kütüphane ve diğer şeyler değil) yazar. Havuzda olmadan yazdığı parçacıklar havuza fonksiyon olarak dahil edilir.
+13-Kütüphaneler ve gerekli diğer kodlar ile fonksiyonu tamamlar ve kodu çalıştırır.
+14-Netice tamamen doğruysa kural doğru tespit edilmiş demektir. Emin olmak için bu sefer de çıktıdan girdiye doğru olan kuralın bunun tam tersi olması gerektiğine binaen ters fonksiyon tanımlanır, kütüphane ve diğer elemanlar tamamlanır ve kod tatbik edilince girdiye doğru şekilde ulaşılıp ulaşılamadığı tetkik edilir. Doğruysa kural doğru demektir. Değilse iki ihtimal vardır: ya ters alma işlemi hatalıdır yahut kural bozuktur. Ters alma işlemi tekrar teftiş edilince yine düzelmezse bu kural ikinci cevabı oluşturmak için saklanır, asıl kural aranmaya devam edilir.
+15-Hem yukarıda işaret olunmayan adımlarda hem de şimdi geçerli olmak üzere eğer netice kısmen doğruysa doğru olan hücreler işaretlenir ve hatalıların üzerine yeniden murakabe yapılır(reasoning devri).
+16-Kural tespit edilemiyorsa ve namzet kurallar oluşmuşsa içlerinden en doğru olanları sıraya konulup test bulmacasından bu sıralamayı bozacak aksi bir intiba alınmadıkça ilk iki sıradaki kural tatbikat için seçilir.
+17-Namzet kurallar da oluşmamışsa  iki adım uygulanır: A-llm'lere dreamcoder motoru verilir. llm'ler bu motor üzerinde çeşitli parametreleri hassaslaştırarak veya kendileri arama sahasını mantıklı şekilde daraltacak şekilde motora yeni kodlar ilave ederek motoru çalıştırır ve her üretilen kodda motoru durdurup çıktısını teftiş eder ve akıllarına bir şey gelinceye kadar bu şekilde devam eder. Bu 14. adıma tüm bulmacalar üzerinde uğraşılmış olunduktan sonra geçilir, önce tatbik edilmeyip kural bulunamayınca öbür bulmacaya atlanılır. Tüm vakit 12 saati geçemez, Bu yüzden her bulmaca için sayaç tutulur. Her bulmaca için ayrılan süre içinde ne kadar iş yapılabilmişse onlar kaydedilir, geriye iş kalmışsa not bırakılıp devam edilir, oyalanılmaz.
+B- Yüklenilen modellerden biri o an için vram'den kaldırılıp yer açılır ve başka bir yapay zekadan takılı kalınan adımla ilgili ne çözüm üretmesi istenir. Tüm kayıt ve dosyalar da verilir, bu yüzden contexti uzun olması yeğdir. Veyahut bu kayıtlar zaten Rag formatına çevrilip veritabanı şeklinde sunulup inference'ler bununla besleneceği için contexti küçük ama daha zeki bir model de tercihe şayan olabilir.
+18-Her tatbikat submission.json yani yarışma platformunun istediği formatta kaydedilir.
+
+NOT: LLM inference'leri vram'i doldurmadığı müddetçe ve multi-head biçiminde ve tedbir payı hariç vram'i azami kullanacak sayıda yapılır.
+NOT: Eğer bir inference başka bir inference'ten gelen cevabı gerektiriyorsa onlar ayrılır, gerektirmeyenler batch'e dahil edilir.
+NOT: Llm'lere çıktılarının kendi karar verecekleri kısımlarını belli bir yapıda etiketlerle işaretlemeleri söylenir. Bu işaretlemenin ne işe yarayacağını onlar fikretmiştir. Parser kodumuz tool olarak onlara verilir ve eğer kodumuzda olmayan bir etiket veya etiket yapısı varsa llm tarafından uygun şekilde güncellenir. Bu sayede proje akışında llm bizzat mesuliyet alır.
+NOT: Üstteki notun gerektirdiği gibi ana dosyadan farklı, llm'lere prompt verme kodu da araç olarak tanımlanır. LLM, kendisine veya takım arkadaşına verilecek promotları, batch sayısını projeye en uygun şekilde düzenler.Kod içinde read-only ve read-write kısımları vardır, llm'ler yazma salahiyetleri olan yerlere yeni kodlar ilave edebilir veyahut kendisi tamamen ayrı bir dosya oluşturup eski koda kütüphane olarak ekleyebilir. Kodların zararlı olup olmadığını münekkit Llm teftiş edecektir.
+NOT: LLM'lere prompt metninde mesajın başında tahminen kaç token yazacaklarını söylemeleri istenir. Yani bu da bir etikettir😉. Bu token sayısına; gpu,vram,ram,cpu gibi aksamların anlık durumuna göre tahmini süre hesaplanır.Aynı bunun gibi tüm adımlarda tahmini süre hesaplanıp işlemin devam edip etmeyeceği buna ve ayrılabilecek azami süreye göre karar verilir.
+NOT: LLM'lerin çıktılarını gösterdikleri terminal akışı kapatılır, onun yerine dosyalar olarak muhafaza edilir. Bu sayede gereksiz gecikmeler yok edilip teftişler dosyalar üzerinden sağlanır. Llm'ler ilk oluşturulmuş promptlara dokunamaz, onlar itina ile yazılmıştır. Lakin eğer ihtiyaç duyarsa kendi kendisine veya bir başka llm'e verilmesi için bir prompt hazırlayabilir, etiketiyle sunduğu ve kodunu yazdığı zaman çalıştırılabilir. LLM
+NOT: Herhangi bir arızada kodun çalışmaya kaldığı yerden devam edebilmesi için dosya tabanlı checkpoint sistemi kullanılır. Her fonskiyon, her çağrı bir checkpoint olarak tutulur ve çalışma bozulup yeniden başladığı zaman evvela sistemin unuttuğu şeyler geri hatırlatılır ve kalınan yerden devam edilir. Bunun için bizzat arıza durumları için tedbiren hazırlanmış bir arıza.py dosyası bulunur.
+NOT: Dosyalar, değişkenler, llm çıktıları gibi neticeleri arızalara karşı tedbiren yeniden oluşturma kalıp kodu yazılır. 
+NOT: Vakit sayacı ilerledikçe sisteme eksi puan olarak işler. Azami puan 100 olmasına rağmen bulmaca çözmeye çalışılırken puan düşüp llm'lerin kafası karışmasın diye 100'den fazla bir değerden başlayıp saniyeler ilerledikçe belli seviyede azalır. 6 dakikanın sonunda 10 puana düşülür. Eğer çözülememişse ikinci dönüşte 10'dan düşmeye devam eder.
+NOT: LLM'in prompt üretmek için şevk katsayısı vardır. Bu sayı bir mevzu hakkında ne kadar fazlaysa llm o konu hakkında o kadar çok çıktı üretmeli ve çıktıların devamını sağlamak için promptlar da üretmelidir. Katsayıyı yükseltmenin şartları şunlardır: Eğer bir istek henüz yerine getirilememişse, 
+
+
+
+
+NOT: Mucitlikte kuluçka anı diye bir tabir vardır. Biz bunu kendi sistemimizde temsil edeceğiz. Tüm bulmacalar gözden geçirildikten ve muhtemel kombinasyonlar llm'e gösterildiği zaman llm'ler muhakeme devrine başlar. Çıktı üretmeden, arka planda sürekli düşünür. Düşünüp delile dayandırarak net şekilde emin olduğu tespitleri rag sistemine kaydedilir, emin olmadıkları üzerinden düşünmeye devam eder.Bu devrin ne kadar süreceği kalan süreye bağlıdır, belli bir noktadan sonra muhakeme durdurulup çıkan neticeler yeniden kendisine verilir ve çıktıyı üretmesi beklenir.
+NOT: Tek bir llm kullanmak da gayet mümkündür. İkinci llm'in yapacağı münekkitlik vazifesini aynı llm farklı batchlerde yapabilir. Mesela ilk 5 batch'de sorular reasoning(bundan sonra muhakeme namıyla anılacak) devriyle cevaplanırken ikinci 5'lik devirde bu cevaplar, akıl yürütmeler yani kısacası her şey tenkide tabi tutulur.
+
+
+
+NOT: GPU, cpu gibi sistemlerin ne zaman kullanacağı iyi bir şekilde planlanır. Her donanım her şey için kullanılmaz.
+
+
+NOT: Donanımlardan azami seviyede istifade edebilmek için model küçültme haricindeki torch_inference, with torch.no_grad(), DataCollatorWithPadding, flash_attention_2, OpenBLAS, asyncio, deepseed, fsdp, onnx runtime ve tensor rt isimli optimizasyon kütüphaneleri, araçları, parametreleri vesaireden azami derecede faydalanılır.(ilk yükleme için hazır durumda, doğruluğu tetkik edilmeli)
+
+
+
+
+NOT: Matris tipinden ayrılmamalı, renkler şunlar dışında bir şey olmamalı, çıktı ızgarası girdi ızgarasının içinden bir parça olabilir, aynı ebatta olabilir gibi çeşitli kurallar tanımlar ve python kodunu yazarız, llm'in verdiği çıktı bunlara aykırıysa llm'e bir daha üretim yapması gerektiği söylenir.
+NOT: LLM bulmacadaki kuralı tespit etse de etmese de mutlaka aynı kalması gereken tipteki hücreleri belirler. Bunu test bulmacası için de yaptıktan sonra kalan hücrelerin tüm kombinasyonları gpu'da numpy matris olarak hesaplanır ve mantıksız olanlar da (mesela sabit bir cismin renklerinin apayrı yerlerde olması gibi) elenir. Geri kalanlar kaydedilir ve llm'lere "bu kombinasyon olsaydı kural ne olurdu, bizim girdi-çıktılarımızla uyumlu mu?" diyerek tetkik ettirilerek ihtimaller epeyce azaltılır. 
+LLM, ızgara kombinasyonları üzerindeki mantıki kısıtları tespit çıkarır. Bu kısıtlar, MAXSAT benzeri bir mantık çerçevesinde continuous relaxation yöntemiyle ihtimal vektörlerine dönüştürülür. Reasoning Layer, ihtimal vektörlerini optimize ederek kurala en uygun kombinasyonları üretir; yani kurallara uyan ve yüksek olasılıklı çözümler öncelikli olarak ortaya çıkar.
+Her bir kombinasyon embedding ile sayısal bir değere çevrilir. Birbiriyle en çok alakalı olan kombinasyonlar bulunup graph ile temsil edilir. Bu temsillerden hem kod hem llm'in de yardımıyla beam search ve bazen de do_sample usulüyle belirlenen sayıda farklı dal üzerinden oluşması en makul olan kombinasyonlar tespit edilir. Bundan sonra yükü Llm göğüsler ve oluşan birkaç kombinasyondan ilk ikisini mantıki delillerle tercih eder.
+NOT: Context penceresindeki maliyeti azaltmak için kullanacağımız Rag veritabanı usulünde dual embedding usulünü yani hem embedding modelini hem de kendi asıl modelimizi kullanacağız.
+NOT: statik-dinamik hangi cache tipinin kullanılacağı o an mevcut olan şartlara göre belli olacak.Yani "değişmeli cache idaresi" kullanılacak.
+
+NOT: Saat planlaması LLM insafına bırakılmayacaktır. İf-else mantığı tafsilatlı şekilde belirlenecektir.
+NOT: Feature extraction için wavelet ve fourier analizi kullanılır. Bu, bilhassa desen tipi değişiklikleri tespit etmekte fevkaladedir.
+NOT: Her bulmacanın çözülme yüzdesi kaydedilecek.
+NOT: Bulmacaların tamamlanma yüzdesi ve o ana kadar geçen vakte göre bulmacalar kolay, orta, zor gibi lakin daha detaylı, belki yüzdelik zorluk şeklinde sınıflandırılır. İkinci devir en kolay bulmacadan en zora doğru devam eder.
+ NOT: Beam search veya herhangi başka tür bir arama usulünde maksimum adım sayısı belirlenir. Mesela bu bulmacada teknik olarak 100 adım ve ötesinin olma ihtimali kesinlikle yok. çok nadir şekilde 50-60 civarı olabilir(eğer her hücre bir işlem sayılırsa, ama bu sayı bile fazla). Kısacası bu derinlik 50'den başlatılır, çözülebilen bulmacaların şartlarına ve oradan edinilen intibaya göre merhale merhale azaltılır. Tahminen 10'a kadar ineceğini zannetmekteyim ama tedbiren 50'den başlayacaktır.
+NOT: LLM'in neredeyse her mevzu için dolduracak bir şablonu olacaktır. Böylece ana mevzularda ilave dikkat kaymasından kaçınmış oluruz. Bu, llm'in etiketli veriler üretmesi vesaireye mugayir değildir, sadece mümkün olan işlerin belli şablonlarda yapılması gerektiği kastedilmiştir.
+
+NOT:İkinci devirde iki bulmacadan hangisini öncelikle çözmemiz gerektiğini belirlerken adımların tamamlanma yüzdeleri(fazla ise fazla tesir), şu an harcanan sürenin ayrılabilecek süreden % kaç fazla olduğu(ters tesir yapmalıdır), şu anki aşamada girdi-çıktı misallerinde en çok yüzde kaç hücrenin doğru çözülebildiği (birden fazla girdi-çıktı olduğu göz önünde bulundurulmalıdır), o bulmaca için harcanan gpu hafızasın ortalama değeri, en çok hafızayı kaç saniye boyu ve kaç aşamada kullandığı, umumi gpu performansında ne gibi tesirler meydana getirdiği gibi parametreler kullanılarak bir formül türetilecektir ki bu formülle tercih yapılacaktır.
+FORMÜL:
+Cadım=tamamlanan adım/toplam adım sayısı
+Chücre=(1/toplam misal(Emax))her misaldeki max için topla(çözülen hücre sayısı/toplam hücre)
+Tharcanan=harcanan süre/azami süre
+Mortalama=(her saniye kullanılan vram toplamı/ geçen saniye)/azami vram(96gb)
+Mmaxkomp= (Eşik vram üzerinde geçirilen saniye/toplam süre).(eşik değer üzerinde seyreden adım sayısı/toplam adım)
+S(bulmaca)=((w1.Cadım)+(w2.Chücre)+(w3.Emax))-((w4.Tharcanan)+(w5.Mortalama)+(w6.Mmaxkompl))
+
+
+
+
+
+NOT: Entropi hesabı şunlar için yapılabilir:  entropi formülüne sokulur, toplamda entropisi düşük olanıkimin  düşükse çözmeye ondan başlanır. 
+
+
+Başka bir misalde çıktı kombinasyonlarının girdiyle farkı(mevki farkı da dahil yüzdelik olarak ölçülüp entropiye sokulur ve düşük çıkan kombinasyonlar önceliklendirilir. Çünkü aşırı değişim daha nadir görülür. Sonradan bu küçük entropililer beam search aramasında birbirine yakın dallarda çıkacaktır. Aramalar küçük farklardan büyük farklara doğru olmalıdır.
+Kombinasyon motoru:
+Bu motor girdi-çıktının ebatlarına göre farklı davranır. Ebatlar aynı ise değişimler tespit edilir ve girdiyi çıktıya yaklaştıran kombinasyonlar üretilir. Mesela girdideki sarılar kırmızı oluyorsa motor o sarı renklerin kırmızıya farklı kombinasyonlarda çevrilmiş ızgara halini üretir. Mesela tek bir kare iki adım ileri gitmişse motor sadece bir kare ileri gidilen ve iki kare ileri gidilen kombinasyonu bulunca iş biter. 
+Başka bir misalde nesne tespiti ve simetri tespiti yaparken daha önce izah ettiğimiz "göz"ün gördüğü hücrelerdeki renklerin toplam görülen hücredeki oranları çıkartılır, entropi düşükse orada az şekil vardır, fazlaysa çok şekil vardır, desen olma ihtimali de artar. Filtrenin yeri ve ebatı tespitlere göre değiştirilir ve esas nesneler ve desenler tespit edilir. Şunu söylemek lazımdır ki varsayılan olarak aynı renklerin kenarlardan beraber oldukları hücreler nesnedir, bunun ihtimali yüzde yüz alınır ama parçalanabilme ihtimali de yüzde yüzdür. Bu aynı bir ekmeğin istenilen yerden ikiye bölünebilmesi gibidir. İstersen 3'e dörde bölebilirsin. Bunlardan hangisinin doğru olduğu girdi çıktıdaki değişimlerden tespit edilir, yani oranlar buna göre dinamik olarak ayarlanır, entropi düşünce varsayılan olarak baskın çıkan ihtimaller kalır.
+
+
+NOT: Evvela tüm bulmacalar hakkında ilk sql tabloları çözüm yapmadan mümkün olan en iyi şekilde doldurulur. Çözülen bulmacaların eğitim faydası olmayacağı, sadece Rag'ı zenginleştireceği için evvela ana test dosyası yani asıl bulmacalar çözülür. hepsine bir kez bakıldıktan sonra çözülenler kaydedilirken çözülemeyenler için fikir versin diye bize önceden verilmiş dosyalar çözülür, Rag zenginleşir. Her 10 bulmacada bir(sayı değişebilir) en kolay bulmacalar çözülmeye çalışılır. İkinci devirden sonra yine eski dosyalar çözülmeye devam edilir.  
+
+NOT: Bulmaca çözülürken evvela girdi çıktı misallerine bakılır. Kural ve kod fonksiyonu hakkında kesinlikle belli olan kural ve kısıtlamalar llm tarafından uygun dille(kod, arkdil ifadesi, metin) ifade edilir.Daha sonra kendi 10 tahminini ifade eder. Bunlar kod ve kombinasyon motoruna aktarılır. Her iki motor da bu ifadelere istinaden beam search ile en muhtemel varyasyonları üretir ve kaydeder. Her 10 üretimde bir llm'in tetkikine muhatap olur. Bu şekilde sürekli iyileştirme olur. Kod varyasyonları girdiye uygulanarak çıktıyı verip vermediği kontrol edilir. Hatalı olanlar elenir ve neden hata olduğu llm tarafından değerlendirilir. Ortaya yeni bir kısıt veya kaide çıkarsa bu da ilave edilir. Eğer doğru bir kod çıkmış ise diğer misal girdi-çıktıya geçilir ve ilk olarak bu kod denenir. Bunda da doğru çalışırsa teste tatbik edilip cevap kaydedilir. Eğer yanlış çıkmışsa yine tetkikat ile gelişim devam eder. İlk girdi-çıktıya uyup da ikinciye uymayan olursa sebebi llm tarafından bulunmaya çalışılır, yeni kısıtlar ile arama döngüsü devam eder. Doğru çalışmayan üretimler hemen silinmeyip doğruluk yüzdesi kaydedilir ve arama yapılacağı zaman yüksek yüzdelikli ihtimallere öncelik vermek kaydıyla düşük ihtimalliler de bir dereceye kadar göz önünde bulundurulmuş olur.
+
+
+✅NOT: LLM, arama uzayını daraltırken şablon olarak "bu ispatlı" "bu aşikardır" "tahminimce" "öyle gözüküyor ki" gibi etiketler kullanır.
+İspatlı ve aşikar gibi etiketlerin olduğu kısımlar doğrudan doğruya kısıt fonksiyonuna dahil edilir, tahminler ise kısıt namzeti haline getirilip saklanır. Lakin etiket sisteminin henüz ayrıntılı olarak belirlenmediği ve bu fikrin değişebileceği göz önünde bulundurulmalıdır.
+
+NOT:Kod parçalarının toplam çözülen bulmacalarda kullanılma yüzdeleri çıkartılır ve fazla ihtimali olanların olduğu programlar evvelce kullanılır.
+
+
+
+
+NOT: Modelin uzayına yakın olmayan kelimelerden analoji yaparak bulmacayı çeşitli şekillere veya herhangi bir şeye benzetecek. Buna has bir katman olacak.
+NOT: LLM üretilecek dönüşüm kodunda hangi parçaların kesin olarak var olacağını da belirler ki kod ihtimalleri azalsın, sonra değişken olanlar denenir. Eğer Llm onlardan birinin de olması gerektiğini ispatlarsa o da sabitlenir.
+
+
+NOT: Katman belirleme işleri basitleştirilmiştir. Evvela girdi ızgarasındaki farklı renkler aynı renkler küme olacak şekilde rastgele katmanlara atanır, sonra aynısı çıktıya yapılır. Girdideki her eleman mutlaka çıktıda da var olacakmış gibi düşünülür yani aynı katmanlarda dururlar. Hareket, silinme gibi haller bu teoriye uymayan bulmacalarda olabilir. Buna göre if else kurulur. Çıktı ekranında asıl gözüken renk kümeleri de katmanlara atanınca üstten gözüküp gözükmediğine göre if else yapısıyla denetlenir ve gözükmüyorsa üst katmana atanır. Bu rastgele işlemler bittikten sonra katmanlar birbirine olabildiğince yakınlaştırılır. Bu sayede kimin önde, kimin arkada olduğu belli olur.
+
+
+NOT:GE (Grammatical Evolution) usulunde kod parçacıkları sayı dizileriyle temsil edilip oluşturulan dil kuralına göre çeşitli kombinasyonlar denenerek hem hafıza yükü azaltılır hem de bazı avantajları vardır. Dsl ise bir kod havuzudur. Biz ise bir ilişki yumağı havuzu yazacağız. Burada değişime tabi olabilen şeyler, değişimle alakalı olabilenler, alaka seviyeleri gibi çeşitli ifadeler yer alır. her ifade bir sayı ile temsil edilir. Çeşitli kısıtlamalardan sonra bu ilişki yumağının muhtemel kombinasyonları hesaplanınca hipotez oluşturmak için doğrudan hazır bir defter oluşur. Artık Llm tercihiyle hepsi sırayla denenirse çözüme mutlaka ulaşılır. Yani ilişki yumağı, kod yumağı ve ızgara yumağıyla üç ayrı yumak kombinasyonları hesaplanır.
+
+
+NOT: Izgara ebatları dahi bulmacaya dahildir, bu da ilişki yumağıyla tespit edilir. Çünkü çözdüğüm bulmacalardan çok farklı ızgara ebatları tespit edilmiştir ve bu ebatların bulmaca çözülmeden belirlenmesi mümkün değildir.
+NOT:Eminlik seviyesini hesaplama usulü bulalım. En basitinden deriz ki , her etiketli bölüm için üretilmiş tokenler yüzde kaç ihtimalle üretildiyse hepsini toplar ve bölüm sayısına böleriz. Veya çarpımlı bir iş yaparız. Çıkan yüzdelik o bölümdeki emniyet katsayısıdır. Her bölümün emniyet katsayısını da aynı işlemlere tabii tutup tüm çıktının emniyetini hesaplarız.
+
+NOT:Rag yerleştirme usulünde kosinüs benzerliği değil kosinüs mesafesi kullanmalıyız.
+
+NOT: LLM'in hakikaten kendinden emin olduğunu anlamak için ürettiği metin içindeki bazı kelimelerin manası, neden o şekilde kullanıldığı ayrı bir prompt olarak, teftiş döngüsünde eklenir.Bu sorular manuel hazırlanabileceği gibi zor da olsa modelin kendisi tarafından kısır döngüye düşme ihtimali olsa da üretilebilir. Soru sorulabileceği gibi ona aslında yanlış olan bir şey doğruymuş gibi söylenebilir ve çıktıya göre eminlik seviyesine karar verilir.
+
+NOT: Sıradan bir Llm'de temprature ayarlaması yapıldığında değiştirilen şey rastgeleliktir. Halbuki bize doğru şeyler lazımdır. Bu yüzden bu katsayı arttırıldığında rastgelelik değil çıktının hesaplandığı usul sayısı fazlalaştırılır ve en doğru çıktı tercih edilir.
+Şu usul daha da makul olabilir: doğruluk oranı, alaka gibi kendi kuracağımız kıstaslara göre model cevabı değerlendirilir ve eğer bir kısım kötü görülürse o kısma kadarki dal aynı bırakılıp sonraki adımda önceden geçtiğimiz daldan geçmek yerine başka yakın ihtimalli bir daldan geçeriz, bu cevap da anında değerlendirilir. Bu sayede üretim-kontrol eş zamanlı şekilde gerçekleştirilir. 
+
+NOT: Tahmini harcanacak süre non-linear regresyon ile profesyonel şekilde modellenir.
+
+NOT: Modelin harici multi-head'lerinin her biri için ayrı sistem talimatı tanımlanır. Etiketli bir çıktı üretildiği zaman çıktı ile talimat arasındaki ve talimata en yakın 100 kelime arasındaki matematiksel benzerlik hesaplanır. Hangi modelin talimatı en benzer çıkıyorsa çıktı ona yönlendirilir.
+
+
+NOT: Modelimiz lora usuluyle edebi metinlerle eğitilir çünkü aslında dıştan bakınca dünya nesnelerine benzeyen bulmacalar da vardır. Modele png dosyası verilir ve bu resimde gerçek hayatta var olan bir şekil görüyor musun diye sorulur. Bunun hakkında hikaye yaz denir, bulmacadaki nesnenin özellikleriyle birebir uyumlu bir hikaye olsun denir, mesela kare bir kurbağa ise "kurbağanın burnundaki x hücresi..." dahi denebilir.
+
+
+NOT:promptun içinde uzun cevap istenir ve eğer minimum token doğrudan belirlenirse o direk kabul edilir, değişkene atanmış olan bu değer min new token olarak kodda doğrudan kullanılır.Sadece uzun olsun denilirse başka bir batch tarafından durumun getirdiği şartlara göre lakin bol keseden belirlensin.
+
+NOT:Model inference ederken her bir cümle bitince otomatik olarak batch count miktarı artar, yani ilk cümleden sonraki cümleden mesela 10 cümle daha üretilir, sonra diğer cümle en muhtemele göre her biri için mi bir tane hesaplansın. Yani hala 10 ayrı mesaj var. Bunlar bir kontrole tabii tutulur ve en iyi tek mesaj seçilir. Sonra yine 10’luk üretim yapılır, sonraki cümleyle onların da tetkiki yapılır.

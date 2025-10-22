@@ -1,0 +1,86 @@
+1.	LLM, özgürce bir cevap üretir.
+Cevabında kendi biçimlendirme sistemini (örneğin [kod]...[/kod], <exec>..., {{explanation}} gibi) icat eder.
+	2.	Sonra kendi yazdığı “parser (ayrıştırıcı)” kodu ile bu biçimi çözümlemek için gerekli kuralları yazar.
+Mesela:
+import re
+def parse_sections(text):
+    code = re.findall(r"<exec>(.*?)</exec>", text, re.S)
+    comment = re.findall(r"\{\{(.*?)\}\}", text, re.S)
+    return {"code": code, "comment": comment}
+
+
+tamam — şimdi anladım. Yani “(etiket)” gibi bir biçimle değişkenleri işaretlemeyi kast ediyorsun, mesela:
+
+Kullanıcı (şehir) şehrinde yaşıyor ve (yaş) yaşında.
+
+Evet, teknik olarak sadece parantezli (etiket) formatı genelde yeterlidir, ama şu farkları bilmek mühim:
+
+⸻
+
+🔹 1. Parantezli formatın (etiket) gücü
+
+Bu format:
+	•	Kolay ayrıştırılır (parse edilir) — regex veya token bazlı ayırma basit olur.
+	•	Model tarafından doğal biçimde anlaşılır — parantezler genellikle “placeholder” olarak yorumlanır.
+	•	Dil bağımsızdır — her sistem, her lisan anlayabilir.
+
+Yani şu tür değişkenli yapılar için mükemmel bir tercih:
+
+Bugün (tarih) tarihinde, (şehir) şehrinde hava (durum).
+
+
+⸻
+
+🔹 2. Yetersiz kalabileceği durumlar
+
+Bazı karmaşık yapılarda tek parantezli biçim karışıklık çıkarabilir:
+	1.	İç içe değişkenler varsa:
+
+(müşteri(ismi))
+
+→ Bunu ayrıştırmak zorlaşır.
+
+	2.	Tür veya tip bilgisini de taşımak gerekiyorsa:
+
+(isim:str), (yaş:int), (tarih:datetime)
+
+Bu durumda iki nokta “:tip” biçimi eklenir.
+Bu, veri tabanı veya yapay zekâ için daha anlamlı olur.
+
+⸻
+
+🔹 3. Alternatif olarak düşünülebilecek biçimler
+
+Biçim	Kullanım amacı	Avantajı
+(etiket)	Basit değişken	En sade biçim
+{etiket}	JSON benzeri format	JSON parse kolaylığı
+<etiket>	XML benzeri yapı	Hiyerarşi belirtmek için
+(etiket:tip)	Veri tipi eklenmiş	Doğrulama kolaylığı
+[[etiket]]	Model prompt’larında dikkat çekici	Token karışıklığı az
+
+
+⸻
+
+🔹 Özetle
+
+Senin sorduğun gibi:
+
+“(etiket)” formatı kâfi mi?
+
+👉 Evet, çoğu senaryoda tamamen kâfi.
+Ama tür, yapı veya iç içe veri gerekiyorsa şu üçlü sistem idealdir:
+
+(değişken_adı:türü=varsayılan_değer)
+
+Misal:
+
+(şehir:str=İstanbul)
+(yaş:int=25)
+
+Bu biçim hem insan okuyabilir hem de makine işleyebilir.
+
+⸻
+
+İstersen senin sistemine en uygun biçimi seçelim:
+Elindeki vazifeler değişkenli mi, yoksa sabit metin üzerinden mi çalışıyor?
+Ona göre tek tip mi, iki katmanlı tip mi kurmak daha doğru olur, birlikte belirleyelim.

@@ -1,0 +1,160 @@
+Elbette. Sunduğunuz degisim_kurali fonksiyonu, ARC problemlerinin doğasını ifade eden mükemmel bir soyutlama ve meta-fonksiyondur. Bu, bir kuralın "anatomisini" tanımlar. İsteğiniz üzerine, bu anatomiyi temel alarak, bir ARC çözücüsünün Alana Özgü Dili'ni (DSL) oluşturacak 50 farklı ve somut ilişkisel fonksiyon üretiyorum.
+
+Bu fonksiyonlar, sizin teorinizdeki UYGULAYICI (veya Amele) modülünün doğrudan kullanabileceği, test edilmiş operasyonlar olacaktır. Her fonksiyonun açıklamasında, sizin X, D, I, K çerçevenize nasıl oturduğu belirtilmiştir.
+
+ARC İçin 50 İlişkisel Fonksiyon Kütüphanesi
+I. Renk ve Doku Operasyonları (1-10)
+rengi_degistir(nesne, yeni_renk)
+Açıklama: Belirli bir nesnenin tüm piksellerinin rengini değiştirir.
+X: nesne, D: 'renk değiştirme', K: yeni_renk sabitine dönüşüm.
+alani_doldur(baslangic_noktasi, yeni_renk)
+Açıklama: Bir başlangıç noktasından başlayarak bitişik aynı renkteki tüm alanı (flood fill) yeni renge boyar.
+X: baslangic_noktasi'ndan yayılan alan, D: 'doldurma'.
+renkleri_tersine_cevir(nesne_veya_izgara, renk_haritasi)
+Açıklama: Bir nesne veya tüm ızgaradaki renkleri belirli bir haritaya göre birbirine dönüştürür.
+X: nesne_veya_izgara, D: 'renkleri dönüştürme', K: renk_haritasi.
+cogunluk_rengine_boya(hedef_nesne, referans_alan)
+Açıklama: hedef_nesne'yi, referans_alan (başka bir nesne veya tüm ızgara) içindeki en sık görülen renge boyar.
+X: hedef_nesne, D: 'renk değiştirme', I: referans_alan, K: 'çoğunluk kuralı'.
+desen_uygula(alan, desen_tipi)
+Açıklama: Belirli bir alanı dama tahtası ('dama'), çizgili ('yatay_cizgi') gibi bir desenle doldurur.
+X: alan, D: 'desenle doldurma', K: desen_tipi.
+renk_paletini_kopyala(hedef_nesne, kaynak_nesne)
+Açıklama: hedef_nesne'deki renkleri, kaynak_nesne'nin renk paletine göre sıralı olarak değiştirir.
+X: hedef_nesne, D: 'palet kopyalama', I: kaynak_nesne.
+nesneyi_tek_renk_yap(nesne, hedef_renk)
+Açıklama: Çok renkli bir nesnenin arka plan dışındaki tüm piksellerini tek bir renge indirger.
+X: nesne, D: 'renkleri birleştirme'.
+koordinata_gore_renklendir(izgara, renk_fonksiyonu)
+Açıklama: Izgaradaki her pikseli, koordinatına ((satir, sutun)) bağlı bir fonksiyona göre renklendirir.
+X: izgara'daki pikseller, D: 'koordinata göre renklendirme', K: renk_fonksiyonu (örn: (r+c)%2).
+en_az_kullanilan_renkle_boya(nesne, referans_izgara)
+Açıklama: Bir nesneyi, tüm ızgarada en az görülen renge boyar.
+X: nesne, D: 'renk değiştirme', I: referans_izgara, K: 'en az kullanım kuralı'.
+renkleri_kaydir(nesne_veya_izgara, kaydirma_miktari)
+Açıklama: Renk paletindeki renkleri dairesel olarak kaydırır (örn: 1->2, 2->3, ..., 9->1).
+X: nesne_veya_izgara, D: 'renk kaydırma', K: kaydirma_miktari.
+II. Geometrik ve Yapısal Dönüşümler (11-20)
+nesneyi_tasi(nesne, delta_satir, delta_sutun)
+Açıklama: Bir nesneyi belirtilen miktar kadar kaydırır.
+X: nesne, D: 'taşıma'.
+nesneyi_dondur(nesne, aci, merkez_noktasi)
+Açıklama: Bir nesneyi, belirli bir merkez etrafında 90, 180, 270 derece döndürür.
+X: nesne, D: 'döndürme', I: merkez_noktasi.
+nesneyi_yansit(nesne, yansitma_ekseni)
+Açıklama: Bir nesnenin yatay veya dikey simetriğini alır.
+X: nesne, D: 'yansıtma (aynalama)', I: yansitma_ekseni.
+nesneyi_boyutlandir(nesne, olcek_x, olcek_y)
+Açıklama: Bir nesneyi en-boy oranlarını değiştirerek yeniden boyutlandırır.
+X: nesne, D: 'boyutlandırma'.
+sinirlayici_kutuyu_ciz(nesne, renk, doldur=False)
+Açıklama: Bir nesneyi çevreleyen en küçük dikdörtgeni çizer.
+X: yeni 'dikdörtgen nesne', D: 'oluşturma', I: nesne, K: 'sınırlayıcı kutu kuralı'.
+disbukey_zarfi_olustur(nesne, renk)
+Açıklama: Bir nesnenin tüm piksellerini içeren en küçük dışbükey (convex hull) şekli oluşturur.
+X: yeni 'dışbükey nesne', D: 'oluşturma', I: nesne, K: 'dışbükey zarf kuralı'.
+nesnenin_kenarlarini_cikar(nesne, renk)
+Açıklama: Sadece nesnenin dış kenarlarını içeren yeni bir nesne oluşturur.
+X: yeni 'kenar nesnesi', D: 'çıkarma', I: nesne.
+nesnenin_govdesini_yer_cekimi_ile_dusur(nesne, zemin_seviyesi)
+Açıklama: Bir nesnenin her sütunundaki pikselleri, birbirine bağlı kalacak şekilde zemine indirir.
+X: nesne, D: 'yerçekimi uygulama', I: zemin_seviyesi.
+nesneyi_eg(nesne, egme_faktoru, yon)
+Açıklama: Bir nesnenin satırlarını veya sütunlarını kaydırarak paralelkenar şekline getirir (shear).
+X: nesne, D: 'eğme'.
+merkeze_hizala(nesne, referans_alan)
+Açıklama: Bir nesneyi, referans alanın (başka bir nesne veya tüm ızgara) merkezine taşır.
+X: nesne, D: 'taşıma', I: referans_alan'ın merkezi.
+III. Nesne Oluşturma, Silme ve Birleştirme (21-30)
+ozellige_gore_filtrele_ve_tut(nesneler, ozellik, deger)
+Açıklama: Nesneler listesinden sadece belirli bir özelliğe sahip olanları tutar, diğerlerini siler.
+X: nesneler, D: 'filtreleme (silme)', K: ozellik ve deger kuralı.
+nesneleri_birlestir(nesne_listesi)
+Açıklama: Birden fazla nesnenin piksellerini birleştirerek tek bir nesne oluşturur (union).
+X: yeni 'birleşik nesne', D: 'birleştirme', I: nesne_listesi.
+nesnelerin_kesisimini_al(nesne1, nesne2)
+Açıklama: İki nesnenin ortak piksellerinden oluşan yeni bir nesne oluşturur (intersection).
+X: yeni 'kesişim nesnesi', D: 'kesişim alma', I: nesne1 ve nesne2.
+nesneyi_bol(nesne, ayirma_kurali)
+Açıklama: Tek bir nesneyi, bir çizgiye veya başka bir kurala göre birden fazla parçaya ayırır.
+X: yeni 'parça nesneler', D: 'bölme', I: nesne, K: ayirma_kurali.
+nesneyi_kopyala_ve_tasi(nesne, delta_satir, delta_sutun)
+Açıklama: Bir nesnenin kopyasını oluşturur ve belirtilen konuma taşır.
+X: yeni 'kopya nesne', D: 'kopyalama ve taşıma', I: nesne.
+arka_plani_nesneye_donustur(izgara, yeni_renk)
+Açıklama: Izgaradaki tüm arka plan piksellerini (renk 0) tek bir nesne haline getirir.
+X: yeni 'arka plan nesnesi', D: 'dönüştürme'.
+nesneyi_piksel_olarak_parcala(nesne)
+Açıklama: Bir nesneyi, her biri tek pikselden oluşan bir nesneler listesine ayırır.
+X: yeni 'piksel nesneler', D: 'parçalama', I: nesne.
+yalniz_nesneleri_sil(nesneler)
+Açıklama: Başka hiçbir nesneye dokunmayan (temas etmeyen) nesneleri siler.
+X: nesneler, D: 'silme', K: 'yalnızlık kuralı'.
+en_kucuk_nesneyi_buyut(nesneler, referans_nesne)
+Açıklama: En küçük nesneyi, referans bir nesnenin boyutuna getirir.
+X: 'en küçük nesne', D: 'boyutlandırma', I: referans_nesne'nin boyutu.
+deseni_nesne_olarak_cikar(izgara, desen_ornegi)
+Açıklama: Izgara içinde desen_ornegi ile eşleşen tüm tekrarları bularak bunları nesne listesine dönüştürür.
+X: yeni 'desen nesneleri', D: 'çıkarma', I: izgara, K: desen_ornegi.
+IV. Sayısal, Mantıksal ve İlişkisel Operasyonlar (31-40)
+en_yakin_nesneye_tasi(hedef_nesne, aday_nesneler, yon)
+Açıklama: hedef_nesne'yi, belirli bir yöndeki en yakın aday_nesne'ye temas edene kadar taşır.
+X: hedef_nesne, D: 'temas edene kadar taşıma', I: aday_nesneler.
+noktalari_birlestiren_cizgi_ciz(nokta1, nokta2, renk)
+Açıklama: İki nokta arasına düz bir çizgi çizer.
+X: yeni 'çizgi nesnesi', D: 'çizim', I: nokta1 ve nokta2.
+nesne_sayisina_gore_islem_yap(nesneler, sayi_kurali, islem_fonksiyonu)
+Açıklama: Eğer toplam nesne sayısı belirli bir kurala uyuyorsa (>5, ==3 gibi), belirtilen işlemi uygular.
+X: nesneler (potansiyel olarak), D: islem_fonksiyonu, K: sayi_kurali.
+delikleri_doldur(nesne, dolgu_rengi)
+Açıklama: Bir nesnenin içindeki boşlukları (delikleri) doldurur.
+X: 'delik alanları', D: 'doldurma', I: nesne.
+golgeyi_yansit(nesne, yon, uzunluk, renk)
+Açıklama: Bir nesnenin belirli bir yönde "gölgesini" veya "izini" oluşturur.
+X: yeni 'gölge nesnesi', D: 'yansıtma/iz bırakma', I: nesne.
+izgarayi_sararak_tasi(nesne, dr, dc)
+Açıklama: Nesneyi taşır, ancak ızgaranın kenarından çıkarsa diğer taraftan tekrar girmesini sağlar (Pac-Man gibi).
+X: nesne, D: 'sarmalı taşıma', K: 'kenar sarma kuralı'.
+nesneleri_ozellige_gore_sirala(nesneler, siralama_ozelligi)
+Açıklama: Nesneleri boyut, konum gibi bir özelliğe göre yeniden sıralar (bu, sonraki işlemler için önemlidir).
+Bu bir dönüşüm değil, bir 'hazırlık' fonksiyonudur.
+en_uzak_iki_noktayi_bul(nesne)
+Açıklama: Bir nesnenin parçası olan ve birbirinden en uzakta olan iki pikseli bulur.
+Bu bir 'bilgi çıkarma' fonksiyonudur.
+simetri_eksenini_tamamla(yarim_nesne, eksen)
+Açıklama: Simetrik olduğu varsayılan yarım bir nesnenin diğer yarısını oluşturur.
+X: yeni 'tamamlanmış nesne', D: 'tamamlama', I: yarim_nesne, K: 'simetri kuralı'.
+nesne_icindeki_deseni_buyut(nesne)
+Açıklama: Bir nesnenin içindeki küçük bir deseni (örn: 2x2'lik bir blok), tüm nesneyi kaplayacak şekilde büyütür.
+X: nesne, D: 'desen büyütme'.
+V. Izgara (Grid) Seviyesinde Operasyonlar (41-50)
+izgarayi_kirp(izgara, sinirlar)
+Açıklama: Izgarayı belirli koordinatlara göre kırparak küçültür.
+X: izgara, D: 'kırpma'.
+izgarayi_doldurarak_genislet(izgara, yeni_boyut, dolgu_rengi)
+Açıklama: Izgarayı yeni bir boyuta genişletir ve boş alanları dolgu rengiyle doldurur.
+X: izgara, D: 'genişletme'.
+deseni_tekrarla(desen_izgarasi, hedef_boyut)
+Açıklama: Küçük bir desen ızgarasını, hedef boyutu dolduracak şekilde tekrar ederek (tiling) yeni bir ızgara oluşturur.
+X: yeni 'ızgara', D: 'tekrarlama', I: desen_izgarasi.
+alt_izgaralari_cikar(izgara, boyut, adim)
+Açıklama: Izgarayı belirli boyuttaki örtüşen veya örtüşmeyen alt ızgaralara böler.
+X: yeni 'alt ızgaralar', D: 'bölme', I: izgara.
+izgaralari_ust_uste_koy(izgara_listesi)
+Açıklama: Birden fazla ızgarayı, arka plan (renk 0) şeffaf olacak şekilde üst üste birleştirir.
+X: yeni 'birleşik ızgara', D: 'katmanlama', I: izgara_listesi.
+izgarayi_cozunurluk_azalt(izgara, blok_boyutu, kural)
+Açıklama: Izgarayı bloklara böler ve her bloğu, içindeki piksellerin ortalaması/çoğunluğu gibi bir kurala göre tek bir piksele indirger.
+X: yeni 'düşük çözünürlüklü ızgara', D: 'çözünürlük azaltma', K: kural.
+izgara_sutunlarini_sirala(izgara, siralama_kurali)
+Açıklama: Izgaranın sütunlarını, her sütundaki piksel sayısı veya renk gibi bir kurala göre yeniden sıralar.
+X: izgara, D: 'sütun sıralama', K: siralama_kurali.
+yalnizca_degisen_pikselleri_tut(izgara1, izgara2, yeni_renk)
+Açıklama: İki ızgara arasındaki farklı piksellerden oluşan yeni bir ızgara oluşturur.
+X: yeni 'fark ızgarası', D: 'fark alma', I: izgara1 ve izgara2.
+izgarayi_tek_boyuta_indirge(izgara, yon)
+Açıklama: Izgaranın satırlarını veya sütunlarını, içlerindeki renkleri birleştirerek (XOR, OR gibi) tek bir satır/sütuna indirger.
+X: yeni '1D ızgara', D: 'projeksiyon/indirgeme', I: izgara.
+en_buyuk_nesneyi_izgara_yap(nesneler)
+Açıklama: Nesneler listesindeki en büyük nesneyi bulur, onu sınırlayıcı kutusuna göre kırpar ve yeni bir ızgara olarak döndürür.
+X: yeni 'nesne ızgarası', D: 'çıkarma ve kırpma', I: nesneler, K: 'en büyük kuralı'.

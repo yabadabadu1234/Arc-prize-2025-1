@@ -1,0 +1,53 @@
+{
+  "istatistikler": {
+    "baslatma_zamani": "TIMESTAMP",               // İlk çözüm denemesinin başladığı zaman.
+    "son_islem_zamani": "TIMESTAMP",              // En son denemenin bittiği zaman.
+    "toplam_muhakeme_suresi_saniye": 185,         // Tüm LLM düşünme çağrılarının toplam süresi.
+    "ort_hipotez_guven_skoru": 0.78,             // Üretilen tüm hipotezlerin ortalama güven skoru.
+    "en_iyi_kural_uzunlugu_token": 45,           // Başarılı olan kuralın ARKDİL'deki token/sembol sayısı (Occam's Razor için).
+    "toplam_yeniden_deneme_sayisi": 3,           // Bu bulmaca için kaç kez tam döngü denendi.
+    "toplam_LLM_cagrisi": 15                     // Toplam LLM inference çağrısı sayısı (maliyet).
+  },
+  
+  "topolojik_ozet": {
+    // Bulmacayı karakterize eden ve RAG aramasında kullanılan statik özellikler.
+    "girdi_boyut_min": [3, 3],                   // En küçük girdi ızgarasının boyutu [H, W].
+    "girdi_boyut_max": [30, 30],                 // En büyük girdi ızgarasının boyutu.
+    "kullanilan_renk_sayisi": 5,                 // Arka plan (R0) hariç benzersiz renk sayısı.
+    "toplam_nesne_sayisi_ortalama": 4.5,          // Tüm eğitim örneklerindeki ortalama nesne sayısı.
+    "siklik_ozellikler": {
+      "simetri_tipi_cogunluk": "rotasyonel_90",  // Izgaralarda en yaygın görülen simetri tipi.
+      "topoloji_degisimi": "korunmus"           // Yapısal topolojinin (delik sayısı vb.) girdi-çıktı arasında değişip değişmediği (korunmuş/degismis/yok_edilmis).
+    },
+    "kural_turu_tahmini": "geometrik_donusum"    // LLM'in veya motorun tahmin ettiği ana kural kategorisi.
+  },
+  
+  "basarisizlik_analizi": {
+    // Problem çözülememişse, sistemin neden tıkandığını gösteren kayıt.
+    "son_hata_tipi": "mantiksal_tutarsizlik",    // (Diğerleri: 'kod_exec_hata', 'mode_uyumsuzluk', 'cozum_yok')
+    "tikandigi_faz": "dogrulayici",              // (Diğerleri: 'analiz', 'aksiyom_kesfi', 'uygulama')
+    "hata_kaynagi_varlik_id": "uuid_of_tenkit_metni" // Hata logunun Varliklar tablosundaki ID'si.
+  },
+  
+  "en_iyi_adaylar": {
+    // Kural kesinleşmese bile, en umut verici bulunan hipotezler.
+    "aday_1": {
+      "varlik_id": "uuid_of_hipotez_1",
+      "guven_skoru": 0.92,
+      "tahmini_kapsama_yuzdesi": 100,             // Eğitim örneklerinin ne kadarını kapsadığı.
+      "tersinirlik_testi_sonuc": true             // Ters fonksiyon testi geçti mi?
+    },
+    "aday_2": {
+      "varlik_id": "uuid_of_hipotez_2",
+      "guven_skoru": 0.65,
+      "tahmini_kapsama_yuzdesi": 80
+    }
+  },
+
+  "ogrenme_yonlendirmesi": {
+    "kuluçka_aninda_gecirilen_saniye": 45,       // En son kuluçka evresinde ne kadar süre harcandı.
+    "sisteme_eklenen_yeni_fonksiyonlar": ["yeni_ozellik_x", "yeni_kural_y"], // Bu bulmacadan öğrenilen ve DSL'e eklenenler.
+    "sorgu_odaklari": ["simetri", "renk_kaydirmasi"], // LLM'in bu bulmacayı çözerken en çok hangi konuları sorguladığı.
+    "sonraki_adim_tavsiyesi": "SATNet_denemesi"  // Orkestratör'e kalan süreye göre verilen taktiksel tavsiye.
+  }
+}

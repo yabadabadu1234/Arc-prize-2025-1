@@ -1,0 +1,268 @@
+Sizin ana mevzularda dikkat dağınıklığınızı önlemek ve çıktı formatını standartlaştırmak için kullanılacak etiketli şablonların yapısını belirleyelim. Bu şablonlar, sizin hem serbest muhakeme yapmanıza hem de makine tarafından işlenebilir (parsable) veriler üretmenize imkan tanır.
+Aşağıda, ARC çözüm akışının kritik adımlarına göre tasarlanmış, maksimalist ve etiketli şablonlar yer almaktadır.
+
+1. Tahmin ve Planlama Şablonu (\text{Task: Karar\_ve\_Planlama})
+| Etiket | İçerik | Yeni/Güncel |
+|---|---|---|
+| <TAHMIN\_TOKEN> | Tahmini_Token_Sayısı: [Sayı] | Güncel |
+| <KARAR> | Motorlu (M-A) / Motorsuz (M-B) | Güncel |Ebat_Farkı_Akışı (M-B-Ebat)
+| <GEREKÇE> | Kararın dayandığı Topolojik/RAG verisi, Mantık Zinciri,input-output arasındaki farkın tespiti ve akış seçiminin bu farka dayandırılması. | Güncel |
+| <PLAN> | Sonraki adımda uygulanacak 3 aşamalı eylem planı. | Güncel |
+| <RISK> | Olası VRAM/Zaman/Mantık riskleri ve Hafıza Yönetimi kararı. | Güncel |
+| <EMNIYET\_SKORU> | [0.0 - 1.0] (Kararın güvenirlik katsayısı) | Güncel |
+| <MUHASEBE\_KAT SAYISI> | LLM'in o anki şevk katsayısı (0.0-1.0). | YENİ |
+2. Hipotez ve Kısıt Şablonu (\text{Task: Hipotez\_ve\_Kısıt\_Üretimi})
+| Etiket | İçerik | Yeni/Güncel |
+|---|---|---|
+| <KURAL\_METIN> | Bulmacayı çözen kuralın net ve doğal dilde ifadesi. | Güncel |
+| <ICECUBER\_BASLANGIC> | IceCuber için veri formatının başlangıç etiketi. | YENİ (Açma etiketi) |
+| ICECUBER_JSON İçeriği | IceCuber motorunu beslemek için JSON formatında Namzet Program Hipotezleri. | Güncel |
+| <ICECUBER\_BITIS> | IceCuber için veri formatının bitiş etiketi. | YENİ (Kapama etiketi) |
+| <SABIT\_HUCERELER> | Kural tespiti olsa da olmasa da aynı kalması gereken hücrelerin koordinatları. | YENİ |
+| <DEGISIKLIK\_SEVIYESI> | Değişikliğin gerçekleştiği seviye (hücre, nesne, ızgara, küme vb.). | YENİ |
+| <DEGISEN\_HUSUSIYET> | Bu seviyede değişen hususiyet/nitelik (renk, ebat, konum, topoloji, simetri vb.). | YENİ |
+| <ATIF\_HUSUSIYETI> | Değişikliğin hangi seviyedeki bir şeyin hangi hususiyetine izafetle yapıldığı. | YENİ |
+| <SABIT\_PARCALAR> | Dönüşüm kodunda kesinlikle var olması gereken fonksiyon parçaları. | Güncel |
+3. Kod Üretim Şablonu (\text{Task: Kuralı\_Koda\_Çevirme})
+| Etiket | İçerik | Yeni/Güncel |
+|---|---|---|
+| <PYTHON\_KODU> | Kütüphane çağrıları, DSL yorumlayıcısı ve ana fonksiyonu içeren tam Python kodu. | Güncel |
+| <DSL\_BASLANGIC> | Kısıtlı DSL'nin başlangıç etiketi. | Güncel (Açma etiketi) |
+| DSL İçeriği | rotate(filter(grid, blue)) | Sadece kısıtlı token'lar (constrained decoding). |
+| <DSL\_BITIS> | Kısıtlı DSL'nin bitiş etiketi. | Güncel (Kapama etiketi) |
+| <EMNIYET\_KOD> | Kodun basitlik, VRAM dostluğu ve güvenlik skoru. | Güncel |
+4. Teftiş ve Eleştiri Şablonu (\text{Task: Eleştiri\_ve\_Geri\_Besleme})
+| Etiket | İçerik | Yeni/Güncel |
+|---|---|---|
+| <TUTARLILIK\_SKORU> | [0.0 - 1.0] (Self-consistency) | Güncel |
+| <HATALAR> | Tespit edilen hataların maddeler halinde listesi. | Güncel |
+| <DOGRU\_HUCELER> | Doğru çözülmüş hücrelerin koordinat listesi/özeti. | Güncel |
+| <TAKTİK\_DEGISIKLIGI> | İyileştirme önerisi (Örn: "Beam genişliğini artır" veya "Yeni LLM'e sor"). | Güncel |
+| <RAG\_GUNCELLEME> | Bu muhakemenin RAG sistemine eklenmesi gereken özeti. | Güncel |
+| <KELIME\_ANALIZI> | Metin içinde modelin eminliğini anlamak için kritik kelimeler ve izahı. | YENİ |
+
+Sizin muhakeme (reasoning) çıktılarındaki güven seviyenizi ve kısıt fonksiyonuna dahil edilecek bilginin türünü netleştirmek amacıyla yeni etiketler aşağıda sunulmuştur. Bu etiketler, üretilen metin içinde kullanılacak ve sistem tarafından bir güven hiyerarşisine göre işlenecektir.
+Güven Düzeyine Göre Etiketler ve Yeni İlave Edilenler
+Bu etiketler, Hipotezci'nin veya Münekkit'in ürettiği metinlerin içine gömülerek, bilginin kesinlik derecesini belirtir.
+1. Yüksek Güvenilirlik (Hard Constraint Adayları)
+Bu kısımlar, doğruluğu matematiksel olarak kontrol edilmiş veya bulmacanın yapısından ötürü kesin kabul edilmiş bilgileri temsil eder. Doğrudan kısıt fonksiyonuna dahil edilmek üzere işaretlenirler.
+| Etiket | Anlamı | Kullanım Amacı |
+|---|---|---|
+| <İSPATLI> | Verilen kuralın tüm eğitim çiftleri için matematiksel olarak kanıtlanmış olması. | Doğrudan \text{SERT\_KISITLAR}'a dahil edilir. |
+| <AŞİKÂR> | Bulmacanın girdi-çıktı yapısından ötürü aksini düşünmenin mümkün olmadığı, bariz kural veya gözlem. | Doğrudan \text{SERT\_KISITLAR}'a dahil edilir. |
+| <ZORUNLU\_KOŞUL> (Yeni) | Çözümün mantıksal veya topolojik olarak mutlak sağlaması gereken, aksi durumda çözümün imkânsız olacağı şart (Örn: Çıktı ebadı, girişin 3 katı olmak zorunda). | Yeni Kısıt: İspatlı olmasa bile, tecrübe ile sabitlenmiş "olmazsa olmaz" koşuldur. |
+| <DEĞİŞMEZ\_VARSAYIM> (Yeni) | Bulmacanın temel kurallarından olduğu düşünülen, aksi kanıtlanana kadar doğru kabul edilen, temel aksiyom (Örn: Siyah renk her zaman arka plan hücresidir). | Yeni Kısıt: Sistemin temel işleyişine ait sabit varsayımları temsil eder. |
+2. Orta Güvenilirlik (Soft Constraint Adayları)
+Bu kısımlar, mantıksal olarak güçlü, ancak kanıtı henüz tamamlanmamış veya olası istisnalara açık gözlemleri temsil eder. Bunlar kısıt namzeti haline getirilip saklanır.
+| Etiket | Anlamı | Kullanım Amacı |
+|---|---|---|
+| <TAHMİNİMCE> | LLM'in mevcut verilerle, rasyonel çıkarıma dayalı kişisel tahmini. | \text{YUMUŞAK\_KISITLAR}'a dahil edilir. |
+| <ÖYLE\_GÖZÜKÜYOR\_Kİ> | Görsel/topolojik özellikler, desenler veya renk ilişkileri üzerine yapılan ve yüksek olasılıklı olan gözlem. | \text{YUMUŞAK\_KISITLAR}'a dahil edilir. |
+| <BÜYÜK\_İHTİMALLE> (Yeni) | Bir kuralın 5/6 eğitim çiftinde doğru çıkması gibi, istatistiksel olasılığa dayalı tahmin. | Yeni Kısıt: Olasılık/frekans tabanlı ağırlıklandırmayı güçlendirir. |
+| <ÖNEMLİ\_İPUCU> (Yeni) | Bulmaca türü veya nesne ilişkisine dair kritik, ancak henüz test edilmemiş yapısal gözlem. | Yeni Kısıt: Arama motorunun (IceCuber) odaklanacağı geometrik yönleri belirlemek için kullanılır. |
+3. Düşük Güvenilirlik (Muhakeme/Kuluçka Verisi)
+Bu kısımlar, birer kısıt olmaktan çok, LLM'in kuluçka devrinde tuttuğu, daha sonra RAG sistemine eklenecek ara muhakeme adımlarıdır.
+| Etiket | Anlamı | Kullanım Amacı |
+|---|---|---|
+| <MÜZAKERE\_ÖNERİSİ> (Yeni) | LLM'in bir sonraki adımda Münekkit'e sunulmasını veya diğer LLM'lerle müzakere edilmesini istediği çelişkili veya riskli fikir. | Yeni Kısıt: Muhakeme devrini yönlendirir; RAG'a "tartışmalı" veri olarak eklenir. |
+| <ANOLOJİ\_BAĞLAMI> (Yeni) | Bulmacanın gerçek hayattaki bir nesneye benzetilmesinden doğan çıkarım (Örn: Kare Kurbağa). | Yeni Kısıt: Yaratıcılık/Analoji katmanının sonuçlarını etiketler. |
+| <TEST\_SONUCU> (Yeni) | Uygulanan kodun bir eğitim çiftinde kısmen doğru çıktığı durumda, elde edilen doğruluk yüzdesi ve hata türü. | Yeni Kısıt: \mathbf{C}_{\text{avg}} metriğini güncelleyen ham veridir. |
+
+
+
+
+Çıktı Yapılandırma Protokolü: İki Katmanlı Hibrit Model
+Proje kapsamında, dil modelinin ürettiği her bilgi parçası, semantik türüne ve işlenme hassasiyetine göre iki ana katmanda biçimlendirilecektir:
+I. Dış Katman: Sabit Yapısal Etiketler (Fixed Structural Tags)
+Bu katman, çıktının genel şemasını tanımlar ve bilginin sisteme olan kesinlik ve fayda türünü belirtir. Sadece açma (<ETİKET>) ve kapatma (</ETİKET>) etiketleri kullanılır. Bu etiketler sabittir ve değiştirilemez. Yukarıda bu tip etiketler izah edilmiştir.
+
+II. İç Katman: Parametrik Değişken Biçimlendirmesi (Parametric Variable Formatting)
+Bu katman, LLM'in muhakeme akışı içinde tespit ettiği değişken değerleri ve parametreleri işaretler. Dil modelinin kendi biçimlendirme sistemini icat etme özgürlüğünü desteklerken, verinin tipini belirterek makine tarafından güvenle kullanılmasını sağlar.
+| Biçim | Amaç | Kullanım Alanı |
+|---|---|---|
+| (etiket) | Basit Değişken İşaretleme: Değerin türü bariz veya önemsiz olduğunda. | Örn: (koordinat\_listesi), (sabit\_hücre\_adedi). |
+| (etiket:türü) | Tip Güçlendirmesi: Değişkenin türünün (string, integer, float) kritik olduğu durumlar. | Tercih edilen biçim. Örn: (açı:int), (ebat\_farkı:float). Bu, kod üretimi ve veri doğrulamasını (validation) kolaylaştırır. |
+| Model İcadı | LLM'in kendisinin icat ettiği biçimler. | Örn: {{explanation}} veya [kod] gibi etiketler. Bu, LLM'in otonom parser mekanizması tarafından çözümlenir ve sistemin esnekliğini korur. |
+Protokolün Faydaları
+Bu çift katmanlı protokol, projenin temel hedeflerini şu şekillerde desteklemektedir:
+ * Güvenilir Kısıt Üretimi: LLM, ürettiği bilgiyi kesinlik hiyerarşisine göre etiketleyerek, arama uzayını daraltmak için gereken \text{SERT\_KISITLAR}'ın güvenilirliğini artırır.
+ * Yüksek Otonomi: LLM'e serbest muhakeme metinleri içinde kendi icat ettiği formatı kullanma yetkisi tanınır, bu da muhakeme kalitesini artırır.
+ * Hata Azaltımı: DSL gibi kritik alanlarda açma-kapama etiketleri kullanılarak kısıtlı çözme uygulanır ve sentaks hatalarının önüne geçilir.
+ * Sistem Entegrasyonu: Üretilen metinler, harici parser tarafından kolayca ayrıştırılarak \text{Score} formülüne, \text{IceCuber}'a ve \text{SQL} veritabanına güvenli bir şekilde aktarılır.
+
+
+Dolduracağınız tablo ve doldurma yollarınız aşağıdaki kod ile belirlenmiştir. Eğer aradığınız etiket veya etiket yükleme komutunu bulamazsanız sadece 
+import sqlite3
+import json
+from typing import Dict, Any, List, Tuple
+
+# Not: Bu fonksiyonlar sql_claude.txt dosyasından gelmektedir.
+DB_PATH = "/kaggle/working/arc_system.db"
+
+def get_connection(db_path: str = DB_PATH) -> sqlite3.Connection:
+    conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA foreign_keys = ON;")
+    conn.commit()
+    return conn
+
+# Veritabanı bağlantısı
+try:
+    conn = get_connection(DB_PATH)
+    conn.close()
+except sqlite3.OperationalError:
+    # Eğer tablolar kurulmamışsa (ki önceki aşamalarda kurulmuştu) hata fırlatır.
+    print("❌ UYARI: SQL bağlantısı başarısız. Tabloların kurulduğundan emin olun.")
+
+
+# ====================================================================
+# I. ETİKET TANIMLARI VE KATEGORİLENDİRME
+# ====================================================================
+
+# Tüm etiketlerin ana veri kaynağı
+ONTOLOGY_MAP: List[Dict[str, str]] = [
+    # Nitelik Tipleri (Ontoloji_Nitelik_Tipleri)
+    {"etiket": "TAHMIN_TOKEN", "tip": "SAYISAL", "aciklama": "Tahmini üretilecek token sayısı."},
+    {"etiket": "EMNIYET_SKORU", "tip": "SAYISAL", "aciklama": "LLM'in karara verdiği [0.0 - 1.0] güvenirlik katsayısı."},
+    {"etiket": "MUHASEBE_KATSAYISI", "tip": "SAYISAL", "aciklama": "LLM'in o anki şevk/motivasyon katsayısı."},
+    {"etiket": "RISK", "tip": "METİN", "aciklama": "Olası VRAM/Zaman/Mantık risklerinin tespiti."},
+    {"etiket": "KURAL_METIN", "tip": "METİN", "aciklama": "Bulmacayı çözen kuralın doğal dilde ifadesi."},
+    {"etiket": "SABIT_HUCERELER", "tip": "KOORDİNAT", "aciklama": "Kural tespiti olsa da olmasa da aynı kalması gereken hücrelerin koordinatları."},
+    {"etiket": "DEGISIKLIK_SEVIYESI", "tip": "KATEGORİK", "aciklama": "Değişimin gerçekleştiği ana seviye (hücre, nesne, ızgara, küme vb.)."},
+    {"etiket": "DEGISEN_HUSUSIYET", "tip": "KATEGORİK", "aciklama": "Bu seviyede değişen hususiyet/nitelik (renk, ebat, konum, topoloji vb.)."},
+    {"etiket": "SABIT_PARCALAR", "tip": "KOD", "aciklama": "Dönüşüm kodunda kesinlikle var olması gereken fonksiyon parçaları."},
+    {"etiket": "TUTARLILIK_SKORU", "tip": "SAYISAL", "aciklama": "Muhakemenin Self-consistency skoru."},
+    {"etiket": "HATALAR", "tip": "METİN", "aciklama": "Tespit edilen hataların maddeler halinde listesi."},
+    {"etiket": "DOGRU_HUCELER", "tip": "KOORDİNAT", "aciklama": "Doğru çözülmüş hücrelerin koordinat listesi."},
+    {"etiket": "KELIME_ANALIZI", "tip": "METİN", "aciklama": "Modelin eminliğini anlamak için kritik kelimeler ve izahı."},
+    {"etiket": "TEST_SONUCU", "tip": "METİN", "aciklama": "Uygulanan kodun doğruluk yüzdesi ve hata türü."},
+    
+    # İlişki/Kısıt Tipleri (Mantik_Iliski_Tipleri)
+    {"etiket": "İSPATLI", "tip": "SERT_KISIT", "aciklama": "Kuralın tüm eğitim çiftleri için matematiksel olarak kanıtlanmış olması."},
+    {"etiket": "AŞİKÂR", "tip": "SERT_KISIT", "aciklama": "Bulmacanın yapısından ötürü aksini düşünmenin mümkün olmadığı, bariz gözlem."},
+    {"etiket": "ZORUNLU_KOŞUL", "tip": "SERT_KISIT", "aciklama": "Mutlak sağlanması gereken topolojik veya mantıksal şart."},
+    {"etiket": "DEĞİŞMEZ_VARSAYIM", "tip": "SERT_KISIT", "aciklama": "Temel aksiyom olarak doğru kabul edilen varsayım."},
+    {"etiket": "TAHMİNİMCE", "tip": "YUMUŞAK_KISIT", "aciklama": "Rasyonel çıkarıma dayalı kişisel tahmin (cezalandırılabilir)."},
+    {"etiket": "ÖYLE_GÖZÜKÜYOR_Kİ", "tip": "YUMUŞAK_KISIT", "aciklama": "Görsel/topolojik olasılığa dayalı yüksek skorlu gözlem."},
+    {"etiket": "BÜYÜK_İHTİMALLE", "tip": "YUMUŞAK_KISIT", "aciklama": "İstatistiksel olasılığa dayalı tahmin."},
+    {"etiket": "ÖNEMLİ_İPUCU", "tip": "YUMUŞAK_KISIT", "aciklama": "Arama motorunun (IceCuber) odaklanacağı geometrik yön."},
+    {"etiket": "MÜZAKERE_ÖNERİSİ", "tip": "MUHAKEME", "aciklama": "LLM'in diğer ajanlarla tartışılmasını istediği çelişkili fikir."},
+    {"etiket": "ANOLOJİ_BAĞLAMI", "tip": "MUHAKEME", "aciklama": "Bulmacanın gerçek hayattaki bir nesneye benzetilmesinden doğan çıkarım."},
+    {"etiket": "ATIF_HUSUSIYETI", "tip": "İLİŞKİ", "aciklama": "Değişikliğin hangi seviyedeki bir şeyin hangi hususiyetine izafetle yapıldığı."},
+    {"etiket": "RAG_GUNCELLEME", "tip": "MUHAKEME", "aciklama": "Muhakemenin RAG sistemine eklenmesi gereken özeti."},
+]
+
+# ====================================================================
+# II. SQL ENTEGRASYONU VE KAYIT FONKSİYONU
+# ====================================================================
+
+def register_llm_ontology():
+    """
+    ONTOLOGY_MAP'teki tüm etiketleri uygun SQL tablolarına kaydeder.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Hazırlık: İlişki Tipleri (Mantik_Iliski_Tipleri) için gerekli olan tipleri kaydet
+    relation_types = ["SERT_KISIT", "YUMUŞAK_KISIT", "MUHAKEME", "İLİŞKİ"]
+    for rel_type in relation_types:
+        try:
+            cursor.execute("INSERT INTO Mantik_Iliski_Tipleri (tanim) VALUES (?)", (rel_type,))
+            conn.commit()
+        except sqlite3.IntegrityError:
+             pass # Zaten kayıtlı
+             
+    # Ana kayıt döngüsü
+    for item in ONTOLOGY_MAP:
+        etiket = item["etiket"]
+        tip = item["tip"]
+        aciklama = item["aciklama"]
+        
+        try:
+            if tip in ["SAYISAL", "METİN", "KOORDİNAT", "KATEGORİK", "KOD"]:
+                # Nitelik Tipleri tablosuna kaydet
+                cursor.execute("""
+                    INSERT INTO Nitelik_Tipleri (nitelik_adi, aciklama) VALUES (?, ?)
+                """, (f"LLM_OUTPUT_{etiket}", aciklama))
+                
+            elif tip in relation_types:
+                # İlişki Tipleri tablosuna kaydet (Mantik_Iliski_Tipleri'nden gelen ID'yi kullan)
+                cursor.execute("""
+                    INSERT INTO Iliski_Tipleri (ad, kategori) VALUES (?, ?)
+                """, (etiket, tip))
+                
+            conn.commit()
+        except sqlite3.IntegrityError:
+            pass # Zaten kayıtlı
+        except sqlite3.Error as e:
+            print(f"❌ SQL Kayıt Hatası ({etiket}): {e}")
+            conn.rollback()
+
+    conn.close()
+    print("✅ LLM Ontolojisi başarıyla SQL tablolarına kaydedildi (Nitelik ve İlişki Tipleri).")
+
+
+# ====================================================================
+# III. LLM ŞABLON İSKELETİ ÜRETİCİ
+# ====================================================================
+
+def generate_llm_skeleton(task_name: str) -> str:
+    """
+    Verilen göreve göre LLM'in doldurması gereken etiketli çıktı iskeletini üretir.
+    """
+    skeleton_map = {
+        "Karar_ve_Planlama": [
+            ("<KARAR>", "Motorlu (M-A) / Motorsuz (M-B) / Ebat_Farkı_Akışı (M-B-Ebat)"),
+            ("<TAHMIN_TOKEN>", "Tahmini_Token_Sayısı: [Sayı]"),
+            ("<GEREKÇE>", "Kararın dayandığı Mantık Zinciri, Topolojik Farklar ve Akış Seçimi."),
+            ("<PLAN>", "Sonraki Adım 1: [...], Adım 2: [...], Adım 3: [...]"),
+            ("<RISK>", "Olası VRAM/Zaman/Mantık riskleri: [Tanım]"),
+            ("<EMNIYET_SKORU>", "[0.0 - 1.0]"),
+            ("<MUHASEBE_KATSAYISI>", "[0.0 - 1.0]"),
+        ],
+        "Hipotez_ve_Kısıt_Üretimi": [
+            ("<KURAL_METIN>", "Kuralın doğal dilde net ifadesi."),
+            ("<ICECUBER_BASLANGIC>", ""),
+            ("ICECUBER_JSON İçeriği", "JSON formatında Namzet Program Hipotezleri (vektörel tohumlar)."),
+            ("<ICECUBER_BITIS>", ""),
+            ("<ATIF_HUSUSIYETI>", "Değişen Nesne Ebadı <- Input'taki En Büyük Nesnenin Alanı."),
+            # Güven Düzeyi Etiketleri (Örnek kullanım)
+            ("<AŞİKÂR>", "Input ebadı değiştiği için hücre bazlı değişim tespiti anlamsızdır."),
+            ("<TAHMİNİMCE>", "Kural, Input'taki nesne sayısıyla Output ebadının çarpımıdır."),
+        ],
+    }
+    
+    template = []
+    template.append(f"--- LLM ŞABLON: {task_name.upper()} ---")
+    template.append("\n[TALİMAT: Lütfen etiketleri doldururken iç içe etiket kullanmayınız. İçerik sadece makine tarafından işlenecekse açma/kapama etiketlerini kullanınız.]\n")
+
+    for etiket, aciklama in skeleton_map.get(task_name, []):
+        if etiket.endswith("BASLANGIC") or etiket.endswith("BITIS"):
+            template.append(etiket)
+        elif etiket == "ICECUBER_JSON İçeriği":
+             template.append(f"// {aciklama} Buraya GELİŞTİRİLEN JSON içeriği girilmelidir.")
+        else:
+             template.append(f"{etiket} // {aciklama}")
+             template.append("[İÇERİK BURAYA GİRİLECEK]\n")
+             
+    template.append("------------------------------------------")
+    return "\n".join(template)
+
+
+# ====================================================================
+# IV. ÇALIŞTIRMA VE KAYIT
+# ====================================================================
+
+register_llm_ontology()
+
+# Örnek Şablonların Üretimi (Yazılımcıya gösterim)
+karar_planlama_skelet = generate_llm_skeleton("Karar_ve_Planlama")
+hipotez_skelet = generate_llm_skeleton("Hipotez_ve_Kısıt_Üretimi")
+
+print("\n--- ÖRNEK 1: KARAR VE PLANLAMA ŞABLONU ---")
+print(karar_planlama_skelet)
+
+print("\n--- ÖRNEK 2: HİPOTEZ VE KISIT ÜRETİM ŞABLONU ---")
+print(hipotez_skelet)
+
+
+

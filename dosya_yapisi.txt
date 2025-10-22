@@ -1,0 +1,405 @@
+Anlaşıldı. Mevcut dosya yapısı öneriniz, ARC gibi karmaşık bir problem için gereken organizasyon ve veri yönetimi ihtiyacını çok doğru bir şekilde tespit ediyor. Ancak, bu yapıyı en acımasız şekilde tenkit ederek, onu sadece bir "dosya depolama sistemi" olmaktan çıkarıp, sistemin kendisinin beyni ve sinir sistemi gibi çalışan, aktif, sorgulanabilir ve optimize edilmiş bir "Bilgi Mimarisine" dönüştürebiliriz.
+
+Tenkit 1: Yapı "Pasif" ve "İnsan Odaklı"
+Mevcut klasör yapınız mantıklı ama pasif. Bir insanın dosyaları bulması için tasarlanmış. Oysa bizim sistemimiz bir insan değil; o, saniyede binlerce dosyayı taraması gerekebilecek otonom bir varlık. bulmaca_12345/ gibi anlamsız isimler ve derin klasör yapıları, makine için verimsizdir. Ayrıca, hikayeler.log, sualler.log gibi dosyalar, veriyi "türüne" göre ayırıyor ama "ilişkisine" göre değil. "Şu hipotez, şu kod tarafından üretildi ve şu tenkidi aldı" ilişkisi kayboluyor.
+
+Eleştiri: Sistem, veriyi bulmak için dosya sisteminde "yürümek" zorunda kalıyor. Bu yavaş ve kırılgandır.
+
+Tenkit 2: "Rehber Veri" Bir Harita, Ama Aptal Bir Harita
+JSON rehberiniz, "hangi dosyalar nerede" sorusunu cevaplıyor. Bu, statik bir site haritası gibidir. Ancak sistemin ihtiyacı olan şey, "birbiriyle en çok ilişkili olan, en yüksek başarı potansiyeline sahip veya şu anki problemime en çok benzeyen bilgi parçacıkları hangileri?" sorusunu cevaplayabilen dinamik bir GPS'tir. Mevcut JSON, bu anlamsal derinliğe sahip değil.
+
+Eleştiri: Rehber, dosyaların konumunu biliyor ama içeriğini veya önemini bilmiyor.
+
+Tenkit 3: RAG, Potansiyelinin Altında Kullanılıyor
+Mevcut RAG planınız, doğru yolda ama yeterince hırslı değil. Sadece "alakalı bulmacaları" bulmaya odaklanıyor. Oysa RAG, "geçmişte 'simetri' ile ilgili ürettiğim en başarılı kod parçacığı hangisiydi?" veya "Daha önce 'nesneleri sayma' problemiyle karşılaştığımda, Kaptan hangi akıl yürütme zincirini kullanmıştı?" gibi son derece spesifik soruları cevaplayabilmelidir.
+
+Eleştiri: RAG, bir kütüphanenin katalog arama motoru gibi kullanılıyor. Oysa o, kütüphanedeki tüm kitapların içini okuyup, aradığınız spesifik paragrafı size getirebilen bir "araştırma asistanı" olmalıdır.
+
+Aklımdaki En İyi Sistem: "Atomik Bilgi Grafiği" (Atomic Knowledge Graph)
+Unutun klasörleri. Unutun statik JSON dosyalarını. Aklımdaki en iyi sistem, tüm proje bilgisini tek, devasa bir veritabanı içinde, her bir bilgi parçasının "atomik" bir düğüm (node) olduğu bir Graf (Graph) olarak yönetir. Bu, bir dosya sistemi değil, sistemin kendi hafızası ve beynidir.
+
+I. Mimari: SQLite + Vektör Veritabanı (Tek Bir Dosyada)
+Tüm sistemi, /kaggle/working/hafiza.sqlite adında tek bir dosyada yöneteceğiz. Neden SQLite? Çünkü hem geleneksel SQL tablolarını (yapısal veri için) hem de vektör arama eklentilerini (FAISS/ChromaDB gibi) destekler. Bu, bize her iki dünyanın en iyisini sunar.
+
+Veritabanı Şeması (Tablolar):
+
+Bulmacalar Tablosu:
+bulmaca_id (PRIMARY KEY), zorluk, cozuldu_mu, basari_yuzdesi, harcanan_sure...
+Varliklar Tablosu (En Kritik Tablo):
+Bu tablo, projedeki her bir bilgi parçasını atomik olarak saklar.
+varlik_id (UUID, PRIMARY KEY)
+bulmaca_id (FOREIGN KEY)
+varlik_tipi (ENUM: girdi_izgara, sembolik_analiz, hipotez_metni, arkdil_ifadesi, godel_numarasi, python_kodu, tenkit_metni, basari_logu, hata_logu...)
+icerik (TEXT veya BLOB): Bilginin kendisi.
+kaynak_varlik_id (FOREIGN KEY): "Bu bilgi, hangi bilgiden türetildi?" (Örn: Bir Python kodunun kaynağı, bir hipotez metnidir).
+yaratan_ajan (TEXT: "Kaptan", "Amele"...)
+zaman_damgasi (TIMESTAMP)
+meta_veri (JSON): Güven skoru, token sayısı tahmini, vb.
+Iliskiler Tablosu (Graf'ın Kenarları):
+kaynak_id (FOREIGN KEY to Varliklar)
+hedef_id (FOREIGN KEY to Varliklar)
+iliski_tipi (ENUM: URETTI, TENKIT_ETTI, DUZELTTI, DOGRULADI, BENZIYOR...)
+Vektorler Tablosu (Anlamsal Hafıza):
+varlik_id (FOREIGN KEY to Varliklar)
+embedding (VECTOR): icerik'in anlamsal vektör temsili.
+II. İş Akışı: Bilgi Nasıl Akar ve Bağlanır?
+Analiz: Bir bulmaca (bulmaca_abc) işlenmeye başlar.
+sembolik_analiz.py, bir girdi ızgarasını analiz eder. Sonucu Varliklar tablosuna ekler:
+varlik_id: uuid1, bulmaca_id: abc, varlik_tipi: sembolik_analiz, icerik: {...}
+Hipotez Üretimi: Kaptan, bu analize bakar (uuid1).
+Bir hipotez üretir. Bu hipotez, Varliklar tablosuna yeni bir kayıt olarak eklenir:
+varlik_id: uuid2, bulmaca_id: abc, varlik_tipi: hipotez_metni, icerik: "En büyük nesneyi döndür.", kaynak_varlik_id: uuid1
+Iliskiler tablosuna bir kenar eklenir:
+kaynak_id: uuid1, hedef_id: uuid2, iliski_tipi: URETTI
+Tenkit: Münekkit, bu hipoteze bakar (uuid2).
+Bir tenkit metni üretir. Bu da Varliklar tablosuna eklenir:
+varlik_id: uuid3, bulmaca_id: abc, varlik_tipi: tenkit_metni, icerik: "Ya birden fazla en büyük nesne varsa?", kaynak_varlik_id: uuid2
+Iliskiler tablosuna yeni bir kenar eklenir:
+kaynak_id: uuid2, hedef_id: uuid3, iliski_tipi: TENKIT_ETTI
+III. RAG'in Gerçek Gücü: Akıllı Sorgulama
+Artık RAG, sadece dosya aramaz. Sistemin beynine doğrudan SQL ve Vektör Sorguları atar. LLM, artık bir kullanıcı değil, bir veritabanı analistidir.
+
+Örnek Sorgular (LLM'in Kendi Kendine Sorabileceği Sorular):
+
+Basit Sorgu: "bulmaca_xyz için üretilmiş tüm hipotez_metni'lerini getir."
+code
+SQL
+
+download
+
+content_copy
+
+expand_less
+SELECT icerik FROM Varliklar WHERE bulmaca_id = 'xyz' AND varlik_tipi = 'hipotez_metni';
+İlişkisel Sorgu (Graf Sorgusu): "Kaptan'ın ürettiği ama Münekkit'in TENKIT_ETTI'ği ve daha sonra Amele'nin DUZELTTI'ği tüm python_kodu'larını bul."
+code
+SQL
+
+download
+
+content_copy
+
+expand_less
+-- Bu, bir graf veritabanı sorgusuna benzer ve SQL'de JOIN'lerle simüle edilebilir.
+Anlamsal Sorgu (Vektör Sorgusu): "Şu anki problemim 'nesneleri sayma ve temsil etme' ile ilgili. Geçmişte bu konsepte anlamsal olarak en çok benzeyen ve cozuldu_mu=True olan bulmacalarda kullanılmış başarılı python_kodu varlıklarını getir."
+"nesneleri sayma ve temsil etme" metninin embedding'ini hesapla.
+Vektorler tablosunda bu embedding'e en yakın varlik_id'leri bul.
+Bu varlik_id'leri kullanarak Varliklar ve Bulmacalar tablolarını JOIN'leyerek sorguyu tamamla.
+Sonuç: "Beyin Olarak Veritabanı"
+Aklımdaki en iyi sistem, dosyaları ve klasörleri bir kenara atar. Bunun yerine, tüm bilgiyi, her bir düşüncenin, her bir kod parçasının, her bir hatanın birbiriyle ilişkili olduğu, canlı, sorgulanabilir bir bilgi grafiği olarak yönetir.
+
+Avantajları:
+Hız: Dosya sisteminde gezinmek yerine, indekslenmiş bir veritabanında milisaniyeler içinde sorgu yapılır.
+Akıl: Sistem, sadece veriyi değil, veri arasındaki ilişkileri de anlar. Bu, daha derin içgörüler ve daha akıllı kararlar demektir.
+Öğrenme: Başarılı çözüm yolları (bir dizi ilişkili varlik) graf içinde "güçlü yollar" olarak belirginleşir. Sistem, gelecekteki problemlerde bu yolları takip etmeyi öğrenebilir.
+Dayanıklılık: Tek bir SQLite dosyası, atomik işlemlerle (transactions) güncellenir. Bu, veri tutarlılığını garanti altına alır ve checkpoint sistemini çok daha sağlam hale getirir.
+Bu, bir dosya yapısı değil, bir bilişsel mimaridir. Ve bu mimari, projenizi bir ARC çözücüsü olmaktan çıkarıp, kendi hafızası üzerinde düşünebilen bir sisteme dönüştürme potansiyeline sahiptir.
+
+
+Bu harika bir başlangıç. Gönderdiğiniz SQL şeması, "Atomik Bilgi Grafiği" mimarisinin temelini atıyor ve Varliklar, Iliskiler, Bulmacalar tablolarıyla sistemin hafızasını somutlaştırıyor.
+
+Ancak, bu şemayı genişlemeye müsait, RAG dostu ve sizin gelecekteki taleplerinizi ("kodu yeniden yazmaya gerek kalmasın") karşılayacak bir yapıya dönüştürmek için mevcut tasarımı en şiddetli şekilde tenkit edip, üzerine ek tablolar, hiyerarşik yapılar ve endeksleme stratejileri eklememiz gerekiyor.
+
+İşte en iyi sistemi tarif eden, genişlemeye ve RAG'a tam uyumlu, profesyonel bir revizyon:
+
+En İyi Sistem: Genişletilmiş Atomik Bilgi Grafiği (Extended Atomic Knowledge Graph - GÖKAS)
+GÖKAS, sadece veri depolamaz; veri arasındaki hiyerarşiyi (kim kimden türedi) ve RAG için hayati olan anlamsal bağları (embedding'ler) ayrık ve optimize edilmiş tablolarla yönetir.
+
+Tenkitler ve Revizyon Prensipleri
+Tek Tip icerik (Tek Tip Sözleşme):
+Tenkit: icerik sütununu BLOB olarak tutmak, performans ve sorgulama açısından kötü bir pratiktir. Eğer içeriğin çoğu metin ise, metin olarak tutulmalı; eğer ikili veri ise (PNG, Gödel numarası), o zaman BLOB veya ayrık bir tablo kullanılmalıdır.
+Revizyon: Varliklar tablosunda icerik alanını TEXT olarak tutalım. Büyük ikili veriler için ayrık bir tablo kullanalım.
+Yenilikçi Kod Yönetimi:
+Tenkit: Gelecekte LLM'lerin ürettiği yeni DSL fonksiyonlarını (kodu read-write kısımlarına yazacaklar) nerede saklayacağız? Bunlar sadece bir varlik değil, sistemin Background Knowledge'ini (BK) güncelleyen fonksiyon kütüphaneleridir.
+Revizyon: Yeni bir Kod_Kutuphanesi tablosu ekleyelim.
+Ölçüm ve Maliyet Yönetimi:
+Tenkit: Bulmacalar tablosundaki harcanan_sure çok genel. LLM'in kendi tahmin ettiği maliyetler, gerçek maliyetler ve tenkit skorları gibi detaylar kayboluyor.
+Revizyon: Surec_Loglari adında yeni bir ayrıntılı tablo ekleyelim.
+GÖKAS: SQL Şeması (Türkçe Pseudocode)
+Aşağıdaki şema, tüm tabloların genişlemeye müsait olmasını ve gelecekteki LLM / RAG ihtiyaçlarını karşılamasını garanti eder.
+
+code
+Python
+
+download
+
+content_copy
+
+expand_less
+function init_db(db_path = "/kaggle/working/hafiza.sqlite"):
+    connect = sqlite.connect(db_path)
+    # PRAGMA ile hız ve concurrency ayarları (Kaggle ortamında önemli)
+    execute("PRAGMA journal_mode = WAL;")  # Daha hızlı yazma (opsiyonel)
+    execute("PRAGMA foreign_keys = ON;")   # Veri bütünlüğünü zorunlu kıl
+
+    begin transaction
+
+    # =========================================================================
+    # 1. BULMACALAR TABLOSU (PROJE YÖNETİMİ)
+    # Genişlemeye Müsaitlik: 'meta' JSON alanı ile yeni istatistikler eklenebilir.
+    # =========================================================================
+    execute("""
+    CREATE TABLE IF NOT EXISTS Bulmacalar (
+        bulmaca_id TEXT PRIMARY KEY,
+        ad TEXT NOT NULL,
+        zorluk REAL,                            -- 0.0 - 1.0 (Başlangıç zorluğu veya ortalama)
+        cozuldu_mu BOOLEAN DEFAULT 0,           -- 0: Hayır, 1: Evet
+        cozum_yolu_id TEXT,                     -- Nihai çözüme giden hipotezin varlik_id'si
+        
+        # İstikrar Ölçütleri (Gelecekteki İstatistikler için)
+        deneme_sayisi INTEGER DEFAULT 0,
+        en_iyi_guven_skoru REAL DEFAULT 0.0,
+        
+        meta JSON,
+        FOREIGN KEY(cozum_yolu_id) REFERENCES Varliklar(varlik_id)
+    );
+    """)
+
+    # =========================================================================
+    # 2. VARLIKLAR TABLOSU (ATOKİK BİLGİ BİRİMİ VE RAG TEMELİ)
+    # Genişlemeye Müsaitlik: 'meta' JSON alanı ve 'varlik_tipi' esnekliği.
+    # =========================================================================
+    execute("""
+    CREATE TABLE IF NOT EXISTS Varliklar (
+        varlik_id TEXT PRIMARY KEY,
+        bulmaca_id TEXT NOT NULL,
+        
+        # TİP ŞEMASI (RAG için Kritik)
+        varlik_tipi TEXT NOT NULL,               -- Örneğin: 'girdi_izgara', 'hipotez_metni', 'godel_numarasi', 'sembolik_analiz'
+        icerik_tipi TEXT NOT NULL,               -- 'text', 'json', 'prolog_kod', 'numpy_array_path'
+        
+        icerik TEXT,                             -- İçeriğin kendisi (çünkü çoğu veri metin veya JSON'dur)
+        icerik_uzunlugu INTEGER,                 -- Token/Karakter/Bayt sayısı (Maliyet hesaplaması için)
+        
+        # HİYERARŞİ VE OTONOMİ İÇİN
+        kaynak_varlik_id TEXT,                   -- Bu varlığın türetildiği üst varlık (önceki düşünce adımı)
+        yaratan_ajan TEXT,                       -- "Kaptan", "Münekkit", "Amele", "Aleph_Motoru"
+        
+        meta JSON,                               -- Guven skoru, revizyon numarası, başarısızlık nedeni vb.
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY(bulmaca_id) REFERENCES Bulmacalar(bulmaca_id),
+        FOREIGN KEY(kaynak_varlik_id) REFERENCES Varliklar(varlik_id)
+    );
+    """)
+    # Öneri: Çok büyük numpy dizileri için 'icerik' boş bırakılıp, 'icerik_tipi'
+    # 'numpy_array_path' yapılır ve dosya yolunu meta JSON'da saklarız.
+
+    # =========================================================================
+    # 3. İLİŞKİLER TABLOSU (BİLİŞSEL GRAF)
+    # Genişlemeye Müsaitlik: 'iliski_tipi' esnekliği.
+    # =========================================================================
+    execute("""
+    CREATE TABLE IF NOT EXISTS Iliskiler (
+        iliski_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kaynak_id TEXT NOT NULL,
+        hedef_id TEXT NOT NULL,
+        iliski_tipi TEXT NOT NULL,               -- Örneğin: URETTI, TENKIT_ETTI, DUZELTTI, BENZIYOR, AKSİYOM_KULLANDI
+        guven_seviyesi REAL DEFAULT 0.0,
+        meta JSON,
+        FOREIGN KEY(kaynak_id) REFERENCES Varliklar(varlik_id),
+        FOREIGN KEY(hedef_id) REFERENCES Varliklar(varlik_id)
+    );
+    """)
+
+    # =========================================================================
+    # 4. VEKTÖRLER TABLOSU (RAG VE ANLAMSAL ARAMA)
+    # Genişlemeye Müsaitlik: Vektörler, ana içerikten ayrılmıştır.
+    # =========================================================================
+    execute("""
+    CREATE TABLE IF NOT EXISTS Vektorler (
+        varlik_id TEXT PRIMARY KEY,
+        embedding BLOB NOT NULL,                 -- Serileştirilmiş float32 array (HAFİZA)
+        embedding_model TEXT NOT NULL,           -- Hangi modelin ürettiği (örneğin: 'MiniLM-L6-v2')
+        FOREIGN KEY(varlik_id) REFERENCES Varliklar(varlik_id)
+    );
+    """)
+    # Not: Vektör arama hızını artırmak için bu tablo üzerinde FAISS indeksi kurulacaktır.
+
+    # =========================================================================
+    # 5. KOD KÜTÜPHANESİ TABLOSU (DSL VE OTONOMİ)
+    # LLM'in ürettiği yeni DSL parçacıklarını güvenli bir şekilde saklar.
+    # =========================================================================
+    execute("""
+    CREATE TABLE IF NOT EXISTS Kod_Kutuphanesi (
+        fonksiyon_adi TEXT PRIMARY KEY,
+        arkdil_imzasi TEXT NOT NULL,             -- Formal ARKDİL imzası (örn: DONUSUM(o, R))
+        python_kodu TEXT NOT NULL,               -- Çalıştırılabilir Python kodu (Amele'nin ürettiği)
+        basari_orani REAL DEFAULT 0.0,           -- Geçmiş bulmacalarda başarı yüzdesi
+        kaynak_varlik_id TEXT,                   -- Bu fonksiyonun türetildiği ilk hipotez
+        meta JSON,                               -- Güvenlik denetim skoru, son revizyon tarihi vb.
+        FOREIGN KEY(kaynak_varlik_id) REFERENCES Varliklar(varlik_id)
+    );
+    """)
+
+    # =========================================================================
+    # 6. SÜREÇ LOGLARI TABLOSU (VAKİTÇİ VE MALİYET ANALİZİ)
+    # Tüm operasyonların maliyetlerini atomik olarak kaydeder.
+    # =========================================================================
+    execute("""
+    CREATE TABLE IF NOT EXISTS Surec_Loglari (
+        log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bulmaca_id TEXT NOT NULL,
+        kaynak_varlik_id TEXT,                   -- Hangi varlığın işlenmesiyle ilgili
+        islem_tipi TEXT NOT NULL,                -- Örneğin: 'LLM_INFERENCE', 'VERIFIER_CHECK', 'SATNET_OPTIMIZASYON'
+        ajan TEXT NOT NULL,                      -- Hangi ajanın yaptığı
+        
+        # MALİYET METRİKLERİ
+        tahmini_token INTEGER,                   -- LLM'in tahmin ettiği token
+        gercek_token INTEGER,                    -- Gerçekleşen token
+        tahmini_sure REAL,                       -- LLM'in tahmin ettiği süre
+        gercek_sure REAL,                        -- Gerçekleşen duvar saati süresi
+        puan_etkisi REAL DEFAULT 0.0,            -- Vakitçi'den alınan eksi puan
+        
+        meta JSON,
+        FOREIGN KEY(bulmaca_id) REFERENCES Bulmacalar(bulmaca_id)
+    );
+    """)
+    
+    # =========================================================================
+    # PERFORMANS İÇİN İNDEKSLER
+    # =========================================================================
+    execute("CREATE INDEX IF NOT EXISTS idx_varlik_bulmaca ON Varliklar(bulmaca_id, varlik_tipi);")
+    execute("CREATE INDEX IF NOT EXISTS idx_log_sure ON Surec_Loglari(bulmaca_id, ajan, gercek_sure);")
+    execute("CREATE INDEX IF NOT EXISTS idx_iliski_tipi ON Iliskiler(iliski_tipi);")
+
+
+    commit transaction
+    return connect
+Özet ve Genişletme Garantisi
+Bu revize edilmiş şema (GÖKAS), istediğiniz tüm şartları fazlasıyla karşılar:
+
+Genişlemeye Müsaitlik: Her tabloda bulunan meta JSON sütunları sayesinde, gelecekteki herhangi bir istatistik, skor veya özellik (örn: LLM'in sıcaklık ayarı) ek bir tabloya gerek kalmadan saklanabilir.
+RAG Uyumu: Varliklar ve Vektorler tablolarının ayrılması, anlamsal aramayı (RAG) hızlandırır ve basitleştirir. varlik_tipi ve icerik_tipi alanları, LLM'in aradığı içeriği hızla filtrelemesini sağlar (Örn: "Bana sadece python_kodu tipindeki varliklar'ı getir").
+Hiyerarşi ve Bütünlük: kaynak_varlik_id ve Iliskiler tabloları, her bulmacanın içindeki tüm bilgi parçalarının (girdi, analiz, hipotez, tenkit, düzeltme, kod) birbiriyle nasıl bağlantılı olduğunu net bir Graf yapısı olarak tutar. Bu, LLM'in bir kuralın tarihçesini saniyeler içinde takip etmesini sağlar.
+Otonomi Desteği: Kod_Kutuphanesi ve Surec_Loglari tabloları, sistemin kendi kendini yönetmesini (kimin ne zaman ne kadar başarılı olduğu, hangi kod parçalarının yeniden kullanılabileceği) destekleyen verileri sağlar.
+Bu veritabanı yapısıyla, LLM'leriniz artık sadece kaba metin yığınlarına bakmak yerine, yapılandırılmış bir "dijital hafızayı" sorgulayan, öğrenen ve güncelleyen birer "bilgi işlemci" haline gelirler.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Bulmacalar Tablosu (PROBLEM YÖNETİMİ)
+Amaç: Her bir ARC bulmacasının genel durumunu ve başarı istatistiklerini tutar.
+Temel Sütunlar:
+bulmaca_id (TEXT, PRIMARY KEY)
+ad (TEXT, Bulmacanın kısa tanımı)
+ozet
+zorluk (REAL, LLM tarafından tahmin edilen veya hesaplanan zorluk skoru)
+zorluk_kolaylik_sebebi
+gelinen_son_asama
+vazifeyi_yapamayan_aza
+cozuldu_mu (BOOLEAN, Çözüm bulunduysa 1)
+en_iyi_namzet_hipotez_varlik_id (TEXT, En iyi hipotezin ID'si - FOREIGN KEY to Varliklar)
+en_iyi_namzet_kod_varlik_id
+en_iyi_namzet_cevap_varlik_id
+cozum_kodu
+cozum_izgarasi
+cozum_hipotezi
+belirlenen_kesin_tahdidat(kisitlar)
+
+
+
+İstatistik Sütunları:
+6. basari_yuzdesi (REAL, En iyi kuralın eğitim setindeki kapsama yüzdesi)
+7. harcanan_toplam_sure_saniye (INTEGER)
+8. deneme_sayisi (INTEGER, bulmacanın kaç kez gözden geçirildiğinin sayısı)
+9. toplam_LLM_cagrisi (INTEGER, Bu bulmacada yapılan inference sayısı)
+Meta Veri Sütunları:
+10. meta (JSON, Dinamik olarak eklenen istatistikler, örn: Topolojik Özet, Basarısızlık Analizi)
+11. created_at (İçinde üretilmiş olduğu vazife ve o vazifedeki üretim sırası)
+12. vazifelerin_harcadiklari_süre
+13. batchlerin_cagri_siralamasi
+14. motor_kullanimi	(JSON)	Hangi motorların kullanıldığı (Aleph, SATNet, vb.)
+15. uretilen_toplam_hipotez(INTEGER)
+16. uretilen_toplam_kod (INTEGER)
+17. uretilen_toplam_ızgara_kombinasyonu(INTEGER)
+18. uretim_sirasi_kaynagi	(TEXT, Vazife ve Üretim Sırası)	(Taşındı) Varliklar ve Surec_Loglari tablolarındaki sıralı ID'lerin genel referansıdır.
+
+
+2. Varliklar Tablosu (ATOMİK BİLGİ BİRİMLERİ ve RAG TEMELİ)
+Amaç: Sistemdeki her türlü bilginin (girdi, çıktı, analiz, metin, kod) saklandığı merkez tablodur.
+Temel Sütunlar:
+varlik_id (TEXT, PRIMARY KEY, UUID)
+bulmaca_id (TEXT, FOREIGN KEY to Bulmacalar)
+varlik_tipi (TEXT, Zorunlu ENUM: girdi_izgara, sembolik_analiz, hipotez_metni, python_kodu, tenkit_metni, sual_prompt, test_tahmini, nesne, vb.)
+icerik_tipi (TEXT, Zorunlu ENUM: text, json, prolog_kod, numpy_path, vb.)
+icerik (TEXT, Bilginin kendisi. Büyük veriler için dosya yolu içerir.)
+Hiyerarşi ve Otonomi Sütunları:
+6. kaynak_varlik_id (TEXT, FOREIGN KEY to Varliklar, Bu varlığın türetildiği önceki varlık)
+7. ureten_ajan (TEXT, "Kaptan", "Amele", "Aleph_Motoru", vb.)
+8. emniyet_skoru (REAL, Ajanın bu varlığa verdiği güven derecesi, 0.0-1.0)
+9. icerik_uzunlugu (INTEGER, Maliyet hesaplaması için token/karakter sayısı)
+10. meta (JSON, Örneğin: LLM'in bu hipotez için tahmin ettiği kural tipi)
+
+3. Iliskiler Tablosu (BİLİŞSEL GRAF VE NEDENSELLİK)
+Amaç: Varliklar arasındaki nedensel ve mantıksal bağlantıları tanımlar.
+Temel Sütunlar:
+iliski_id (INTEGER, PRIMARY KEY, AUTOINCREMENT)
+kaynak_id (TEXT, FOREIGN KEY to Varliklar, İlişkinin başlangıcı)
+hedef_id (TEXT, FOREIGN KEY to Varliklar, İlişkinin sonu)
+iliski_tipi (TEXT, Zorunlu ENUM: URETTI, TENKIT_ETTI, DUZELTTI, BENZIYOR, KULLANILDI_ILHAM, CEVIRDI_KODA, vb.)
+guven_seviyesi (REAL, Bu ilişkinin veya bağlantının gücü)
+meta (JSON, Örneğin: BENZIYOR ilişkisi için Cosine Similarity skoru)
+created_at (İçinde üretilmiş olduğu vazife ve o vazifedeki üretim sırası)
+✅
+4. Vektorler Tablosu (ANLAMSAL HAFIZA VE RAG)
+Amaç: Varliklar içeriğinin anlamsal temsillerini (embedding'leri) saklar.
+Temel Sütunlar:
+varlik_id (TEXT, PRIMARY KEY, FOREIGN KEY to Varliklar)
+embedding (BLOB, Serileştirilmiş vektör tensörü)
+embedding_model (TEXT, Hangi modelin ürettiği, örn: 'MiniLM-L6-v2')
+meta (JSON, Vektörün normalize edilip edilmediği gibi ek bilgiler)✅
+5. Kod_Kutuphanesi Tablosu (ÖĞRENİLEN DSL VE GÜVENLİK)
+Amaç: LLM'ler tarafından üretilen ve Münekkit tarafından onaylanan, yeniden kullanılabilir fonksiyonları (DSL) güvenli bir depoda saklar.
+Temel Sütunlar:
+fonksiyon_adi (TEXT, PRIMARY KEY, Örn: RENGI_TERCUMAN_ET, NESNEYI_DONDUR_90)
+arkdil_imzasi (TEXT, Formal imzası, örn: DONUSUM(nesne, aci))
+python_kodu (TEXT, Çalıştırılabilir Python kodunun tamamı)
+kural_tipi (TEXT, ENUM: SERT_KURAL, YUMUSAK_KURAL, AKSIYOM_TEMELLI)
+basari_orani (REAL, Tüm geçmiş bulmacalarda bu kuralın başarı yüzdesi)
+uygulanan_nitelikler (JSON, Bu kuralın çalıştığı Nitelik ID'leri listesi)
+kaynak_varlik_id (TEXT, Bu fonksiyonu ilk üreten hipotezin ID'si - FOREIGN KEY to Varliklar)
+meta (JSON, Güvenlik denetim skoru, son revizyon tarihi)
+6. Surec_Loglari Tablosu (VAKİTÇİ VE MALİYET ANALİZİ)
+Amaç: Tüm LLM çağrılarının, motor işlemlerinin ve maliyet metriklerinin kaydını tutar (Muhakeme akışının zaman çizelgesi).
+Temel Sütunlar:
+log_id (INTEGER, PRIMARY KEY, AUTOINCREMENT)
+bulmaca_id (TEXT, FOREIGN KEY to Bulmacalar)
+ajan (TEXT, İşlemi yapan ajan)
+islem_tipi (TEXT, ENUM: LLM_INFERENCE, VERIFIER_CHECK, ALEPH_SEARCH, SATNET_OPTIMIZASYON)
+gorev_asamasi	TEXT	 NOT NULL	
+kaynak_varlik_id (TEXT, Bu işleme neden olan varlık ID'si - FOREIGN KEY to Varliklar)
+Maliyet ve Denge Sütunları:
+6. gercek_sure_saniye (REAL, İşlemin gerçekleştiği süre)
+7. anlik_sistem_puani (REAL, İşlem sonrası sistemin puanı)
+8. tahmini_maliyet_token (INTEGER, LLM'in kendi tahmin ettiği maliyet)
+9. gercek_maliyet_token (INTEGER, Gerçekleşen maliyet)
+10. kuluçka_suresi_saniye (INTEGER, Bu adımdan önce ne kadar kuluçka süresi geçtiği)
+11. meta (JSON, Paralel batch boyutu, GPU sıcaklığı vb. anlık donanım metrikleri)
+
+7. Şema Tanımlama Tabloları (Ontoloji Kümeleri)
+Bu tablolar, LLM'in ve motorun kullanabileceği tüm tip, nitelik ve ilişki isimlerini standartlaştırır. (CNF Derleyici ve Kural Doğrulayıcı için zorunludur.)
+
+Ontoloji_Varlik_Tipleri: (HÜCRE, NESNE, IZGARA, vb. tiplerini tanımlar.)
+Ontoloji_Nitelik_Tipleri: (RENK, BOYUT_ALAN, DELIK_SAYISI, KONUM_MERKEZ gibi ölçülebilir nitelikleri tanımlar.)
+Dinamik_Islem_Tipleri: (TASI, DONDUR, SIL gibi eylemleri tanımlar.)
+Mantik_Iliski_Tipleri: (BENZIYOR, TUM, KONTROL gibi soyut ilişkileri tanımlar.)
+Ek Sütunlar (Ortak): tip_id (PK), tanim (TEXT), kategori (TEXT), ust_tip_id (Hiyerarşi için), meta (JSON).
+
+İndeksler (Optimizasyon)
+idx_varlik_bulmaca_tipi: Varliklar (bulmaca_id, varlik_tipi)
+idx_iliski_kaynak_hedef: Iliskiler (kaynak_id, hedef_id, iliski_tipi)
+idx_vektorler_varlik: Vektorler (varlik_id)
+idx_kod_basari: Kod_Kutuphanesi (basari_orani)
+idx_log_sure: Surec_Loglari (bulmaca_id, gercek_sure_saniye)
+

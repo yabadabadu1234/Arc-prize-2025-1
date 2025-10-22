@@ -1,0 +1,44 @@
+KULLANILABİLECEK YAPAY ZEKA MODELLERİ ve FAYDALINALACAK KOD SETLERİ:
+================================================
+       NAMZETLER(TEK BİR MODEL SEÇİLECEK)
+
+
+https://huggingface.co/Qwen/Qwen3-Embedding-4B-GGUF (Embedding)
+https://huggingface.co/Qwen/Qwen3-VL-8B-Thinking
+(Ana çözücü)
+=============================================
+ FAYDALANILACAK KODLAR VE PROJELER(BAZILARININ TAMAMINDAN FAYDALINALACAK OLMASINA RAĞMEN SADECE BİR DOSYASININ LİNKİ VERİLMİŞ OLABİLİR.)
+https://github.com/michaelhodel/re-arc
+
+https://github.com/marbetschar/arc-prize-2024/blob/main/DreamCoder.ipynb
+https://github.com/marbetschar/arc-prize-2024/blob/main/arc2024/data.py
+https://github.com/marbetschar/arc-dsl/tree/aaaa2d78bb17978ae1fe6b266f7bb27863b441fc
+
+https://github.com/mxbi/dreamcoder-arc?tab=readme-ov-file
+https://github.com/victorvikram/ARC-icecuber
+https://github.com/mxbi/dreamcoder-arc
+
+https://github.com/jerber/arc-lang-public/blob/main/src/run.py
+https://dspy.ai
+
+https://github.com/jwzhanggy/Graph_Toolformer/tree/main
+=============================================
+                  VERİSETLERİ
+https://github.com/google-research-datasets/Education-Dialogue-Dataset
+https://huggingface.co/datasets/eth-nlped/mathdial
+https://huggingface.co/datasets/Eedi/Question-Anchored-Tutoring-Dialogues-2k/viewer/dq-question-metadata
+https://www.kaggle.com/datasets/rtatman/questionanswer-dataset
+https://www.kaggle.com/datasets/stanfordu/stanford-question-answering-dataset
+https://www.kaggle.com/datasets/thedevastator/open-source-logical-reasoning-dataset
+https://huggingface.co/datasets/hivaze/LOGIC-701/viewer
+https://www.kaggle.com/datasets/thedevastator/logical-reasoning-improvement-dataset
+https://www.kaggle.com/datasets/thedevastator/logical-reasoning-improvement-dataset
+https://www.kaggle.com/datasets/sudeepkharel/deep-maths
+
+
+
+https://github.com/logic-and-learning-lab/Popper
+https://github.com/metagol/metagol
+https://github.com/potassco/clingo
+https://github.com/ilaspltd/ILASP-releases/releases/tag/v4.4.1
+

@@ -1,0 +1,1074 @@
+PROJEMİZİN TARİFİ✅:
+
+🔴🔴🔴NOT: Yarışma Kaggle'dadır, onun notebook'u kullanılacaktır. İnternete bağlanmak yasaktır.
+12 saatten fazla çalışılamaz.
+🔴🔴🔴NOT: Yarışmada çözülmesinden mesul olunan asıl
+mesul olunan test bulmacaları 120 tanedir. 1360 tane de eğitim bulmacası vardır. 12 saat sınırından dolayı her test bulmacasına 6 dakika düşmektedir.Eğitim dosyaları da hesaba dahil edilirse her bulmacaya 30 saniye düşmektedir.
+Current AI systems can not generalize to new problems outside their training data, despite extensive training on large datasets. LLMs have brought AI to the mainstream for a large selection of known tasks. However, progress towards Artificial General Intelligence (AGI) is idea constrained. Improvements in AGI could enable AI systems that think and invent alongside humans.
+
+The Abstraction and Reasoning Corpus for Artificial General Intelligence (ARC-AGI-2) benchmark measures an AI system's ability to efficiently learn new skills. Humans have collectively scored 100% in ARC, whereas the best AI systems only score 4%. The ARC Prize competition encourages researchers to explore ideas beyond LLMs, which depend heavily on large datasets and struggle with novel problems.
+
+
+Mevcut dosyalar şunlardır:
+arc-agi_training-challenges.json: contains input/output pairs that demonstrate reasoning pattern to be applied to the "test" input for each task. This file and the corresponding solutions file can be used as training for your models.
+{"00576224": {"train": [{"input": [[7, 9], [4, 3]], "output": [[7, 9, 7, 9, 7, 9], [4, 3, 4, 3, 4, 3], [9, 7, 9, 7, 9, 7], [3, 4, 3, 4, 3, 4], [7, 9, 7, 9, 7, 9], [4, 3, 4, 3, 4, 3]]}, {"input": [[8, 6], [6, 4]], "output": [[8, 6, 8, 6, 8, 6], [6, 4, 6, 4, 6, 4], [6, 8, 6, 8, 6, 8], [4, 6, 4, 6, 4, 6], [8, 6, 8, 6, 8, 6], [6, 4, 6, 4, 6, 4]]}], "test": [{"input": [[3, 2], [7, 8]]}]},
+arc-agi_training-solutions.json: contains the corresponding task "test" outputs (ground truth).
+{"0934a4d8": [[[7, 7, 9], [7, 2, 9], [7, 2, 9], [7, 7, 9], [4, 4, 7], [4, 4, 7], [6, 6, 1], [6, 6, 6], [1, 6, 1]]],
+arc-agi_evaluation-challenges.json: contains input/output pairs that demonstrate reasoning pattern to be applied to the "test" input for each task. This file and the corresponding solutions file can be used as validation data for your models.
+{"135a2760": {"train": [{"input": [[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3], [3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3], [3, 2, 1, 3, 1, 3, 1, 3, 3, 3, 1, 2, 3], [3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3], [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]], "output": [[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3], [3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3], [3, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1, 2, 3], [3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3], [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]]}, "test": [{"input": [[8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],….
+arc-agi_evaluation-solutions.json: contains the corresponding task "test" outputs (ground truth).
+{"0934a4d8": [[[7, 7, 9], [7, 2, 9], [7, 2, 9], [7, 7, 9], [4, 4, 7], [4, 4, 7], [6, 6, 1], [6, 6, 6], [1, 6, 1]]],
+arc-agi_test-challenges.json: this file contains the tasks that will be used for the leaderboard evaluation, and contains "train" input/output pairs as well as the "test" input for each task. Your task is to predict the "test" output. 
+{"00576224": {"train": [{"input": [[7, 9], [4, 3]], "output": [[7, 9, 7, 9, 7, 9], [4, 3, 4, 3, 4, 3], [9, 7, 9, 7, 9, 7], [3, 4, 3, 4, 3, 4], [7, 9, 7, 9, 7, 9], [4, 3, 4, 3, 4, 3]]}, {"input": [[8, 6], [6, 4]], "output": [[8, 6, 8, 6, 8, 6], [6, 4, 6, 4, 6, 4], [6, 8, 6, 8, 6, 8], [4, 6, 4, 6, 4, 6], [8, 6, 8, 6, 8, 6], [6, 4, 6, 4, 6, 4]]}], "test": [{"input": [[3, 2], [7, 8]]}]},
+
+Note: The file shown on this page is a placeholder using tasks from arc-agi_evaluation-challenges.json. When you submit your notebook to be rerun, this file is swapped with the actual test challenges.
+sample_submission.json: a submission file in the correct format
+Each task contains a dictionary with two fields:
+
+"train": demonstration input/output pairs. It is a list of "pairs" (typically 3 pairs).
+"test": test input - your model should predict the output.
+A "pair" is a dictionary with two fields:
+
+"input": the input "grid" for the pair.
+"output": the output "grid" for the pair.
+A "grid" is a rectangular matrix (list of lists) of integers between 0 and 9 (inclusive). The smallest possible grid size is 1x1 and the largest is 30x30.
+
+The data on this page should be used to develop and evaluate your models. When notebooks are submitted for rerun, they are scored using 240 unseen tasks found in the rerun file named arc-agi_test_challenges.json. The rerun tasks will contain train pairs of inputs and outputs as well as the tasks test input. Your algorithm must predict the test output. The majority of the 240 tasks used for leaderboard score only have one test input that will require a corresponding output prediction, although for a small number of tasks, you will be asked to make predictions for two test inputs.
+
+
+Submission File
+
+The submission file for this competition must be a json named submission.json.
+
+For each task output in the evaluation set, you should make exactly 2 predictions (attempt_1, attempt_2). The structure of predictions is shown below. Many tasks have multiple outputs (a multiple dictionaries enclosed in a list), although some tasks have a single output that must be predicted. When a task has multiple test outputs that need to be predicted (e.g., task 12997ef3 below), they must be in the same order as the corresponding test inputs.
+
+IMPORTANT: All the task_ids in the input challenges json file must also be present in the submission.json file. Both "attempt_1" and "attempt_2" must be present, even if your submission doesn't have 2 predictions.
+
+{"00576224": [{"attempt_1": [[0, 0], [0, 0]], "attempt_2": [[0, 0], [0, 0]]}],
+ "009d5c81": [{"attempt_1": [[0, 0], [0, 0]], "attempt_2": [[0, 0], [0, 0]]}],
+ "12997ef3": [{"attempt_1": [[0, 0], [0, 0]], "attempt_2": [[0, 0], [0, 0]]},
+              {"attempt_1": [[0, 0], [0, 0]], "attempt_2": [[0, 0], [0, 0]]}],
+ ...
+}
+
+
+Evaluation
+link
+keyboard_arrow_up
+SCORING METHODOLOGY
+
+This competition evaluates submissions on the percentage of correct predictions on the private evaluation set (100 tasks).
+
+For each task, you should predict exactly 2 outputs for every test input grid contained in the task. (Tasks can have more than one test input that needs a predicted output.)
+
+Each task's test output has one ground truth.
+
+For a given task output, if any of the 2 predicted outputs matches the ground truth exactly (100% correct), you score 1 for that task test output, otherwise 0. The final score is the sum averaged of the highest score per task output divided by the total number of task test outputs. Ex: If there are two task outputs, and one is 100% correct and the other is 0% correct, your score is 0.5.
+
+HARDWARE
+
+ARC Prize 2025 will be designated to use Kaggle's pool of L4x4s. While it is hard to quantify performance improvement with a single metric, these L4x4 GPUs are significantly more powerful than the P100 alternative. Note that on Kaggle's platform, L4x4s consume GPU quota twice as fast as the older T4x2s and P100 machines.
+
+The L4x4s offer 96GB of GPU memory (compared to 29 GB per single P100 and T4x2)
+
+For a further breakdown, see P100s vs L4x4s.
+
+These are not expected to change anytime soon.
+Efficient GPU Usage Tips
+Kaggle provides free access to NVIDIA TESLA P100 GPUs. These GPUs are useful for training deep learning models, though they do not accelerate most other workflows (i.e. libraries like pandas and scikit-learn do not benefit from access to GPUs).
+
+You can use up to a quota limit per week of GPU. The quota resets weekly and is 30 hours or sometimes higher depending on demand and resources
+
+Here are some tips and tricks to get the most of your GPU usage on Kaggle. In general, your most helpful levers will be:
+
+Only turn on the GPU if you plan on using the GPU. GPUs are only helpful if you are using code that takes advantage of GPU-accelerated libraries (e.g. TensorFlow, PyTorch, etc).
+
+
+This is a Code Competition
+
+Submissions to this competition must be made through Notebooks. In order for the "Submit to Competition" button to be active after a commit, the following conditions must be met:
+
+CPU Notebook <= 12 hours run-time
+GPU Notebook <= 12 hours run-time
+No internet access enabled
+External data, freely & publicly available, is allowed, including pre-trained models
+Submission file must be named submission.json
+Submission runtimes have been obfuscated. If you repeat the exact same submission you will see up to 10 minutes of variance in the time before you receive your score.
+CODE REQUIREMENTS
+
+Submissions to this competition must be made through Notebooks. In order for the "Submit to Competition" button to be active after a commit, the following conditions must be met
+
+Technical Specifications
+
+'sistem': {'işletim_sistemi': 'Linux 6.6.56+', 'platform': 'Linux-6.6.56+-x86_64-with-glibc2.35', 'mimari': 'x86_64', 'hostname': 'b8e29a84ed90', 'python_versiyonu': '3.11.13', 'tarih': '2025-10-13 13:53:41.370513'}, 'cpu': {'mikroişlemci': 'x86_64', 'fiziksel_çekirdek': 2, 'mantıksal_çekirdek': 4, 'cpu_kullanimi': 8.0}, 'ram': {'toplam_GB': 31.350486755371094, 'kullanilan_GB': 1.2447090148925781, 'bosta_GB': 29.659046173095703, 'yuzde_kullanım': 5.4}, 'disk': [{'sürücü': '/dev/loop1', 'tip': 'ext4', 'toplam_GB': 19.518142700195312, 'kullanilan_GB': 8.806598663330078, 'bosta_GB': 10.695919036865234, 'yuzde_kullanım': 45.2}, {'sürücü': '/dev/loop1', 'tip': 'ext4', 'toplam_GB': 19.518142700195312, 'kullanilan_GB': 8.806598663330078, 'bosta_GB': 10.695919036865234, 'yuzde_kullanım': 45.2}, {'sürücü': '/dev/loop1', 'tip': 'ext4', 'toplam_GB': 19.518142700195312, 'kullanilan_GB': 8.806598663330078, 'bosta_GB': 10.695919036865234, 'yuzde_kullanım': 45.2}, {'sürücü': '/dev/mapper/snap', 'tip': 'ext4', 'toplam_GB': 8062.387607574463, 'kullanilan_GB': 6515.578926086426, 'bosta_GB': 1546.793056488037, 'yuzde_kullanım': 80.8}, {'sürücü': '/dev/mapper/snap', 'tip': 'ext4', 'toplam_GB': 8062.387607574463, 'kullanilan_GB': 6515.578926086426, 'bosta_GB': 1546.793056488037, 'yuzde_kullanım': 80.8}, {'sürücü': '/dev/mapper/snap', 'tip': 'ext4', 'toplam_GB': 8062.387607574463, 'kullanilan_GB': 6515.578926086426, 'bosta_GB': 1546.793056488037, 'yuzde_kullanım': 80.8}, {'sürücü': '/dev/loop1', 'tip': 'ext4', 'toplam_GB': 19.518142700195312, 'kullanilan_GB': 8.806598663330078, 'bosta_GB': 10.695919036865234, 'yuzde_kullanım': 45.2}], 'ag': {'lo': ['127.0.0.1', '00:00:00:00:00:00'], 'eth0': ['172.19.2.2', '02:42:ac:13:02:02']}, 'gpu': 'GPU bulunamadı veya nvidia-smi çalıştırılamadı.'}
+
+Kaggle Notebooks run in a remote computational environment. We provide the hardware—you need only worry about the code.
+
+At time of writing, each Notebook editing session is provided with the following resources:
+
+12 hours execution time for CPU and GPU notebook sessions and 9 hours for TPU notebook sessions
+
+20 Gigabytes of auto-saved disk space (/kaggle/working)
+
+Additional scratchpad disk space (outside /kaggle/working) that will not be saved outside of the current session
+
+CPU Specifications
+
+4 CPU cores
+
+30 Gigabytes of RAM
+
+P100 GPU Specifications
+
+1 Nvidia Tesla P100 GPU
+
+4 CPU cores
+
+29 Gigabytes of RAM
+
+T4 x2 GPU Specifications
+
+2 Nvidia Tesla T4 GPUs
+
+4 CPU cores
+
+29 Gigabytes of RAM
+
+TPU 1VM Specifications
+
+96 CPU cores
+
+330 Gigabytes of RAM
+
+4. L4x4 (4×24 GB = 96 GB toplam)
+	•	NVIDIA L4, 2023 çıkışlı yeni nesil kart. Her biri 24 GB VRAM.
+	•	4 GPU var, yani tek GPU’da 24 GB, bu sayede 13B modeller float16 ile bile sığar.
+	•	7B zaten tüy gibi gelir. 30B model quantize edilirse multi-GPU ile eğitilebilir.
+	•	Kaggle’ın verdiği bu setup ciddi anlamda yarı-profesyonel düzeyde.
+
+NOTE: CPU Platforms (ex. Intel Skylake, Broadwell, AMD) may be variable during regular notebook runs, however submissions runs (for code competitions or when submissions are rerun in bulk) are always run on Intel Skylake CPUs
+
+KULLANILABİLECEK YAPAY ZEKA MODELLERİ ve faydalınalacak kodlar
+================================================
+                   KAPTAN
+https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E/tree/main (gpu'lara dağıtılacak)
+
+================================================
+                   YAVERLER
+
+https://huggingface.co/OpenGVLab/InternVL3_5-38B-Flash/tree/main
+
+
+https://huggingface.co/barandinho/aya-expanse-32b-turkish-reasoning-sft-ckpt5
+https://huggingface.co/malhajar/Mixtral-8x7B-v0.1-turkish
+================================================
+         KODCU, DOSYACI
+https://github.com/QwenLM/Qwen3-Coder (kod müstahdemi, kod tenkitçi, kod tavsiyeci, dosya tipi çevirici)
+https://huggingface.co/DavidAU/Qwen2.5-Microsoft-NextCoder-Brainstorm20x-42B (kod müstahdemi, kod tenkitçi, kod tavsiyeci, dosya tipi çevirici)
+
+================================================
+             HAFIZA, SUALCİ, MUHABERE
+https://huggingface.co/THU-KEG/LongWriter-Zero-32B (Hafıza, süreç ikazcı, süreç tenkitçi, süreç tavsiyeci, vakitçi)
+https://huggingface.co/Qwen/Qwen2.5-14B-Instruct-1M (hafıza, süreç ikazcı, süreç tenkitçi, süreç tavsiyeci, vakitçi)
+https://huggingface.co/gradientai/Llama-3-8B-Instruct-Gradient-4194k (Hafıza, süreç ikazcı, süreç tenkitçi, vakitçi)
+
+
+https://huggingface.co/sambanovasystems/SambaLingo-Turkish-Base/tree/main (Türkçe-İngilizce, İngilizce-Türkçe tercüman)
+
+https://huggingface.co/ytu-ce-cosmos/Turkish-Gemma-9b-T1/tree/main. (Muhaberatçı, sualci)
+===============================================
+https://github.com/xu3kev/BARC (✅)
+https://github.com/sapientinc/HRM (✅)
+https://github.com/michaelhodel/re-arc
+https://github.com/marbetschar/arc-prize-2024
+
+https://github.com/dbsxodud-11/meta_learning/tree/main/MAML
+https://interactive-maml.github.io/maml.html?utm_source=chatgpt.com
+https://github.com/AntreasAntoniou/HowToTrainYourMAMLPytorch
+
+
+ANA HATLARIYLA TAKİP EDİLECEK SİSTEM✅:
+1. Bulmacanın, çeşitli formatlara çevrilmesi.
+2. Çevrilmiş formatların, uygun yapay zeka veya sisteme verilmesi.
+3. Sistemin, cevabı olan bulmaca girdisi ve çıktısındaki ve test bulmacasındaki nesneleri tespit etmesi.
+4. Sistemin, cevaplı bulmaca çıktısının girdisine göre değişikliklerinin tespit edilmesi.
+5. Sistemin, cevaplı girdiyi çıktıya dönüştüren kaidenin veya fonksiyonun ne ile alakalı olduğunu tespit etmesi.
+6. Sistemin, değişimle alakası olan şeyin nesine izafeten değişiklik olduğunu tespit etmesi
+7. Sistemin, tespitlerine göre kaidenin veya fonksiyonun ne olduğuna dair metin, kod, şekil gibi vasıtalarla hipotez üretmesi. Birden fazla hipotezin Llm'ler tarafından müzakere edilip tatbikat sırasına konulması.
+8. Bu hipotezin bulmacaya tatbik edilmesi
+9. Hipotez yanlış ise llm'ler tarafından 3.adımdan itibaren yapılan işler müzakere edilir ve hatanın nerede olduğu tespit edilmeye çalışılır ve tespit edilen adımdan itibaren adımlar baştan tatbik edilir. Eğer tespit yapılamadıysa 3. adıma geri dönülür ve llm'ler tarafından taktik değişikliği yapılır. Burada Llm'lerin yenilikçilik katsayısının düşük olmaması ehemmiyetlidir.
+10. Hipotez doğru ise test bulmacasında tespit edilen ve kuralla alakalı olan cisimlere kuralın tatbik edilmesi.
+11. Cevabın kaydedilmesi, bulmacada izlenen adımların eğitim için saklanması ve sıradaki bulmacaya geçiş.
+12. Biriken cevapların submission.json formatına getirilmesi ve kaydedilmesi.
+
+
+ADIMLARIN TAFSİLATLANDIRILMASI✅:
+
+NOT: Adımlar boyunca siyah renk hep arka plan hücresidir, hiçbir zaman renk olarak kabul edilmez. Renkli bir hücre boşaltılırsa siyaha dönmüş olur. Lakin siyaha boyamak diye bir şey mevzubahis değildir.
+
+1_A. Bulmacanın, çeşitli formatlara çevrilmesi:
+a- Bulmacanın, her hücresinin tek pikselden ibaret olacak şekilde kabul edilerek "PNG" formatına çevriliş.
+b- Bulmacanın, matris temsiliyle ifade edilmesi için "NPZ" formatına çevriliş.
+c- 3D temsil:Mesela 2D, 4x4 , her hücresi renkli bir ızgarayı 3D formatına çevirmek istiyoruz.Evvela graph mantığı gibi düğüm ve kenarlar kullanacağız. Lakin mantık graphtan faeklı. Kenarlar ilişkiyi değil yapıyı temsil eder. Düğümler ise hücreleri. Evvela her hücrenin kenarı bir kenar olarak kabul edildiğinde kaç kenar varsa mevkileri ve yönleri korunarak tanımlanır. Izgaradaki hücrelerin kenarlıklarını temsil eden bu kenarların içinde kapalı  kare hücreler oluşmuş olur. İşte bu hücrelerin tam ortasına rengini de belirleyerek bir düğüm yerleştirilir. Bir düğümün o hücrenin içinde olduğunun bilinmesi için dış kenarlıklardan farklı olarak yapıyı değil hücre içinde olma içinde olma alakasını temsil eden eden bir tip kenarlık hücrenin 4 kenarına da bağlanır.Hücrelere 3. boyut kazandırılmaz, hücreler 2D kalır. Lakin dosyamız 3D'yi destekleyecek şekilde oluşturulur ki bu sayede hücrelerin aşağı-yukarı hareketi mümkün olur. Eğer bir hücre veya hücreler hareket ederse, asılları muhafaza edilir, kopyalarının ise onları ızgaraya bağlayan kenarları iptal edilir. iç alaka kenarları ise bağlı kalır. Hücre topluluğu hareket ediyorsa onlar arasındaki yapısal kenarlar bozulmaz. Izgara aslen z=10 katmanındadır. z=1 katmanında ise tamamen siyahla kaplı, ana ızgarayla aynı ebat ve mevkide bir ızgara vardır. Ara katmanlar ise tam sayı olmak şartıyla hareket sahasıdır. Siyah ızgara hiçbir şekilde hareket edemez, yerine bir şey geçirilemez. Her hücre için görünürlük adlı bir parametre tanımlanır. Bu değer her zaman en üst katmandaki hücre için "doğru" değeri alır. z=10'da bir hücre varsa o "görünür", geri kalan 9 katman "gmrünmez"dir. Eğer z=10 boş, z=5 dolu ve z=10 ile z=5 arasında da başka hücre yoksa z=5'teki hücre "görünür", diğerleri "görünmez"dir. "Renk" parametresi ise 10 farklı değer alabilir. Renk haritası budur ve her format çevriminde bu harita kullanılacaktır:
+COLOR_MAP = {
+    0: "FF000000",  # Black
+    1: "FF0074D9",  # Blue
+    2: "FFFF4136",  # Red
+    3: "FF2ECC40",  # Green
+    4: "FFFFDC00",  # Yellow
+    5: "FFAAAAAA",  # Grey
+    6: "FFF012BE",  # Magenta
+    7: "FFFF851B",  # Orange
+    8: "FF7FDBFF",  # Sky Blue
+    9: "FF870C25"   # Maroon
+}
+
+
+
+
+1_B. Bu format değişiklikleri neden yapılır?:
+a_1: Png dosyası yapılır çünkü hem resim hem metin işleyebilen openai oss 120B ve benzeri bir modele verilecektir.
+a_2: Her hücre tek piksel ile temsil edilecektir çünkü dosyanın büyüklüğü azaltılmak istenmektedir ve her hücrenin tek bir piksel ile temsili gereksiz hesaplamalara ihtiyaç bırakmaz, modelin bulmacaya daha iyi odaklanmasını sağlar.
+b_1: Bulmaca matrise çevrilir çünkü matrislerde hem satır dizisi hem sütun dizisi korunur, işlem yapmak kolaylaşır. {Matrislere doğru sayılar atanırsa bulmacanın cevabı matematik işlemleriyle de çıkabilir.
+b_2: Matris formatı olarak NPZ seçilmiştir çünkü numpy kütüphanesinin desteği vardır, makinenin işlemesi kolaydır.
+
+ .npy, .npz, TFRecord, Arrow veya Parquet gibi formatlar ham dosya olarak LLM’in anlayacağı metin formatında değiller. Ama adapter kullanırsak, yani Python/ML kütüphaneleri ile tensör veya embedding’e çevirirsek, LLM’e “direkt tensor” veya “embedding” olarak verebiliriz. İşin püf noktası burada: doğrudan metin olarak tokenlaştırmak yerine, sayısal temsil üzerinden modele beslemek.
+
+⸻
+
+1️⃣ .npy / .npz → Tensör adapter
+
+import numpy as np
+import torch
+
+# .npz dosyası
+data = np.load("matrix_data.npz")
+matrix = data["my_matrix"]  # shape: (rows, cols)
+
+# PyTorch tensöre çevir
+tensor_matrix = torch.tensor(matrix, dtype=torch.float32)
+
+# Artık LLM’in embedding pipeline’ına verebilirsin
+# Örnek: custom embedding model
+embedding = my_embedding_model(tensor_matrix)  # shape: (rows, embedding_dim)
+
+
+⸻
+
+2️⃣ TFRecord → TensorFlow tensör
+
+import tensorflow as tf
+
+raw_dataset = tf.data.TFRecordDataset("data.tfrecord")
+
+# Parse function ile tensörlere çevir
+def parse_fn(example_proto):
+    feature_description = {'matrix': tf.io.FixedLenFeature([cols], tf.float32)}
+    return tf.io.parse_single_example(example_proto, feature_description)
+
+dataset = raw_dataset.map(parse_fn)
+
+
+⸻
+
+3️⃣ Arrow / Parquet → Tensör veya embedding
+
+import pyarrow.parquet as pq
+import torch
+
+table = pq.read_table("data.parquet")
+matrix = table.to_pandas().values   # numpy array
+tensor_matrix = torch.tensor(matrix, dtype=torch.float32)
+
+
+⸻
+
+🔑 Özet mantık
+	1.	.npy, .npz, TFRecord, Arrow/Parquet sütun ve satır yapısını koruyor, bu yüzden JSON gibi tokenized metin yerine daha güvenli ve bütünlüklü bir temsil sunuyor.
+	2.	Adapter = Dosyayı okuyup tensör veya embedding’e çeviren kod parçası.
+	3.	Tensör veya embedding → LLM’in embedding katmanına veya RAG pipeline’a veriliyor, sütun ilişkisi bozulmadan işleniyor.
+
+⸻
+
+Yani “verilir verilmez” gibi bir şey yok. Bir Python adapter kullanıp tensör/embedding’e dönüştürmek zorundayız.
+
+c_1: 3D bir temsile ihtiyaç vardır çünkü bazı cisimler aslında birbiriyle üst üste gelmiş fakat biz fark etmiyor olabiliriz. 3D temsil, renklerin uzayda hangi katmanda olduğunu ve bir cisim hareket ettiği zaman hangi cismin hangi cismin üzerine geleceği ve dolayısıyla üst cepheden bakıldığında hangi rengin müşahede edileceğine karar vermekte mühim rol oynar.
+
+2. Çevrilmiş formatların, uygun yapay zeka veya sisteme verilmesi:
+A- PNG:
+a_1: Multimodal bir yapay zekaya hem görüntü hem de metinli izah verilir. Bulmaca hemen çözülmez. Yukarıda belirtilen adımlara uygun olarak sabırlı davranılır. Ayrıntılar anlatılacaktır.
+a_2:GUST'a verilir
+B- Matris:
+b_1: Matris işleyebilecek bir Llm'e verilir.
+
+C- 3D Temsil
+
+3d temsilde katmanları her zaman tespit etmeye ihtiyaç yok ve zaten edilemez. Katmanların tespit edilmesine ihtiyaç olan bulmacalar şu şekillerde belirlenir:
+1-Izgaradaki bir renk seçilir.
+2- O renkte birbiriyle temas halinde yani bağlı olan hücreler toplu olarak etiketlenir. Bağlı olan nesneleri tespit etmek için bir misal:
+CONNECTED COMPONENTS:
+from collections import defaultdict, deque
+
+def connected_components(grid):
+    """
+    2D renk ızgarasında her renk için 4-komşulukla bağlı bileşenleri bulur.
+    grid: [['R','R','.'],['.','R','G'], ...] gibi liste-liste
+
+    Dönüş: { 'R': [ {(0,0),(0,1)}, {(1,1)} ], 'G': [ {(1,2)} ] , ... }
+    """
+    if not grid:                 # Boş ızgara kontrolü
+        return {}
+
+    rows, cols = len(grid), len(grid[0])
+    visited = [[False]*cols for _ in range(rows)]
+    components = defaultdict(list)
+
+    # 4-komşuluk yön vektörleri: yukarı, aşağı, sol, sağ
+    directions = [(1,0), (-1,0), (0,1), (0,-1)]
+
+    for r in range(rows):
+        for c in range(cols):
+            color = grid[r][c]
+            if color == '.' or visited[r][c]:
+                continue  # boş veya zaten işlenmiş
+            # Yeni bileşen BFS
+            comp = set()
+            q = deque([(r,c)])
+            visited[r][c] = True
+
+            while q:
+                x,y = q.popleft()
+                comp.add((x,y))
+                for dx,dy in directions:
+                    nx, ny = x+dx, y+dy
+                    if (0 <= nx < rows and 0 <= ny < cols and
+                        not visited[nx][ny] and grid[nx][ny] == color):
+                        visited[nx][ny] = True
+                        q.append((nx,ny))
+            components[color].append(comp)
+
+    return components
+
+grid = [
+    ['R','R','.','.'],
+    ['.','R','.','R'],
+    ['.','.','R','R']
+]
+print(connected_components(grid))
+OUTPUT:{
+ 'R': [
+        {(0,0),(0,1),(1,1)},      # 1. kırmızı bileşen
+        {(1,3),(2,2),(2,3)}       # 2. kırmızı bileşen
+      ]
+}
+NOT:Bu kodda 4'lü komşuluk gösterilmiştir, çaprazdaki temaslara ehemmiyet vermek gerekirse 8'li komşuluğa bakılabilir.
+
+3- Şu durunlarda katmanlar aranacaktır:
+a-iki veya daha fazla etiketli toplululuk birbirleriyle temas halinde ise
+b- bir etiketli topluluğun sahasının içinde kalan bir topluluk varsa veya tek bir hücre varsa
+c- devam eden seriden araya farklı renkler girip tekrar eski renk serisine dönülüyorsa
+📘def contour_edges(component):
+    """
+    component: set((r,c), ...)
+    4-komşulukla kontur kenarlarını çıkarır
+    Çıkış: kenar koordinatları seti [ ((x1,y1),(x2,y2)), ... ]
+    """
+    edges = set()
+    directions = [(-1,0), (1,0), (0,-1), (0,1)]  # yukarı, aşağı, sol, sağ
+    for r,c in component:
+        for dr,dc in directions:
+            nr, nc = r+dr, c+dc
+            if (nr,nc) not in component:
+                if dr==-1: edge=((r,c),(r,c+1))
+                elif dr==1: edge=((r+1,c),(r+1,c+1))
+                elif dc==-1: edge=((r,c),(r+1,c))
+                else: edge=((r,c+1),(r+1,c+1))
+                edges.add(edge)
+    return edges
+def contour_overlap(comp1, comp2):
+    """
+    İki bileşenin konturlarının ortak kenarlarını kontrol eder.
+    True: en az bir kenar çakışıyor → potansiyel üst üste binme
+    """
+    edges1 = contour_edges(comp1)
+    edges2 = contour_edges(comp2)
+    return len(edges1 & edges2) > 0
+grid = [
+    ['R','R','.','.'],
+    ['.','R','.','B'],
+    ['.','.','B','B']
+]
+
+# connected_components fonksiyonunu önceki örneklerden alıyoruz
+components = connected_components(grid)
+
+# Kontur bazlı potansiyel çakışma
+for color1, comps1 in components.items():
+    for color2, comps2 in components.items():
+        if color1 >= color2:  # Tekrar etmeyi önle
+            continue
+        for c1 in comps1:
+            for c2 in comps2:
+                if contour_overlap(c1, c2):
+                    print(f"{color1} ve {color2} potansiyel kontur çakışması")
+📘Bounding Box (BB) — her bileşenin sınır kutusunu hesapla.
+def bounding_boxes(components):
+    """
+    components: connected_components(grid) çıktısı
+    Dönüş: { renk : [ ((min_r,min_c), (max_r,max_c)), ... ] }
+    """
+    boxes = {}
+    for color, comp_list in components.items():
+        boxes[color] = []
+        for comp in comp_list:
+            rows = [r for r,_ in comp]
+            cols = [c for _,c in comp]
+            min_r, max_r = min(rows), max(rows)
+            min_c, max_c = min(cols), max(cols)
+            boxes[color].append(((min_r, min_c), (max_r, max_c)))
+    return boxes
+grid = [
+    ['R','R','.','.'],
+    ['.','R','.','R'],
+    ['.','.','R','R']
+]
+from pprint import pprint
+cc = connected_components(grid)
+pprint(bounding_boxes(cc))
+OUTPUT:
+{
+ 'R': [ ((0,0), (1,1)),   # 1. bileşenin kutusu
+        ((1,3), (2,3)) ] # 2. bileşenin kutusu
+}
+KONTROL:BB_A ∩ BB_B ≠ ∅: A ve B nesnelerinin bu dikdörtgen kutuları çakışıyor (kesişimin boş olmaması) demek. Matematiksel olarak “A’nın kutusuyla B’nin kutusunun kesişimi boş değilse” ifadesi.
+def bb_overlap(bb1, bb2):
+    """
+    bb1, bb2: ((min_x, min_y), (max_x, max_y)) formatında bounding box
+    Dönüş: True/False, kesişiyor mu?
+    """
+    (x1_min, y1_min), (x1_max, y1_max) = bb1
+    (x2_min, y2_min), (x2_max, y2_max) = bb2
+
+    # Kutu çakışmaması koşulları
+    if x1_max < x2_min or x2_max < x1_min:
+        return False
+    if y1_max < y2_min or y2_max < y1_min:
+        return False
+    return True
+
+# Örnek kullanım
+bb_red = ((0,0), (2,2))
+bb_blue = ((1,1), (3,3))
+bb_green = ((3,0), (4,1))
+
+print(bb_overlap(bb_red, bb_blue))   # True (kesişiyor)
+print(bb_overlap(bb_red, bb_green))  # False (kesişmiyor)
+
+
+
+4. 8-Komşu Kontur
+
+Eğer köşegen bitişiklik de sınırları tekleştirsin istiyorsak, kontur çıkarırken köşegen yönleri de (±1, ±1) ile tarayabiliriz. Bu, daha “pürüzsüz” bir dış hat oluşturur.
+Bu yaklaşım, her bağlı bileşen için çevre uzunluğunu hesaplamak (kenar sayısı × birim uzunluk) veya kapalı poligon oluşturmak için de doğrudan kullanılabilir.
+Bu fonksiyonun asıl faydası, renkli ızgaradaki bağlı bileşenin tam sınır çizgisini çıkarmak. Bu bize birkaç önemli imkân verir:
+	•	Çevre/alan hesabı: Hücre sayısı ile alanı, kenar sayısı ile çevre uzunluğunu ölçebiliriz. Bir bileşenin ne kadar “yayılmış” olduğunu bu kenarlardan buluruz.
+	•	3D veya vektörel çıktı: Kenar listesi, SVG gibi vektörel biçimlere veya 3D modelleme için “mesh” (örgü) verisine dönüştürülebilir. Yani piksellerden bağımsız, ölçeklenebilir şekil elde ederiz.
+	•	Katman ve çakışma tespiti: ARC bulmacası gibi üst üste binen katmanları incelerken, renk kümelerinin sınırlarının kesişip kesişmediğini bu kenar koordinatlarından anlayabiliriz.
+	•	Bilgisayarlı görü/robotik: Görüntü işleme, haritalama, robot yol planlama gibi alanlarda “hangi bölgeler engel, hangi bölgeler serbest” ayrımı için tam sınır hattı gerekir.
+
+Kısacası contour_edges sayesinde, sadece “bu hücreler aynı renk” bilgisinden çıkıp, o kümeyi gerçek bir geometrik şekil gibi kullanabilir ve pek çok analiz veya görselleştirme adımının temelini atabiliriz.
+
+📘Perimeter / Contour — her bileşenin dış hattını çıkar (komşuluk 4 veya 8).
+def contour_edges(component):
+    """
+    component: tek bir bağlı bileşen kümesi (set of (r,c))
+    Çıktı: sınır kenarlarının listesi [ ((x1,y1),(x2,y2)), ... ]
+    Kenarlar grid koordinatlarında hücre köşelerine göre verilir.
+    """
+    edges = set()
+    directions = [(-1,0), (1,0), (0,-1), (0,1)]  # yukarı, aşağı, sol, sağ
+    for r,c in component:
+        for dr,dc in directions:
+            nr, nc = r+dr, c+dc
+            if (nr,nc) not in component:
+                # Kenarın ızgara köşe koordinatları (r,c) hücresinin kenarına göre
+                if dr == -1:   # üst kenar
+                    edge = ((r, c), (r, c+1))
+                elif dr == 1:  # alt kenar
+                    edge = ((r+1, c), (r+1, c+1))
+                elif dc == -1: # sol kenar
+                    edge = ((r, c), (r+1, c))
+                else:          # sağ kenar
+                    edge = ((r, c+1), (r+1, c+1))
+                edges.add(edge)
+    return edges
+
+grid = [
+    ['R','R','.'],
+    ['.','R','R'],
+    ['.','.','R']
+]
+cc = connected_components(grid)
+for color, comps in cc.items():
+    for comp in comps:
+        print(color, contour_edges(comp))
+📘Topology signatures — delikler, çokgen kenar sayısı, convexity.
+from scipy.spatial import ConvexHull
+
+def topology_signature(component):
+    # component: {(r,c), ...}
+    edges = contour_edges(component)  # daha önce tanımladığımız fonksiyon
+    polygon = order_edges_to_polygon(edges)  # Kenarları kapalı sıra haline getir
+    hole_count = count_holes(component)     # Mask içi boşluk DFS
+    corner_count = len(polygon)
+    area = polygon_area(polygon)
+    hull = ConvexHull(polygon)
+    convexity = area / hull.volume  # 2D’de volume = hull alanı
+    return {
+        "holes": hole_count,
+        "corners": corner_count,
+        "convexity": convexity
+    }
+{'holes': 1, 'corners': 6, 'convexity': 0.82}
+
+
+LLM'LERİN KULLANILMA USULLERİ✅:
+A_1: LLM VAZİFELERİ:
+NOT: Her aza her zaman kullanılmak zorunda değildir, buna hem donanım imkanı yoktur hem de ihtiyaç yoktur.Burada azalar verilecek, kullanılma sırası ve verimlilik sonradan iyileştirilip plan yapılacaktır.
+UMUMİ:
+1-Kaptan (En büyük):Her adımda başkanlığı idare eder. Tüm llm'lerin işlerinden mesuldür.Context'i büyüktür.Reasoning kabiliyeti vardır.
+
+2-Haberci ve Sualci (orta): LLM'ler arasındaki muhabereyi temin eder. Bazen çıktı metinlerini özetler, bazen tamamını iletilir. Eğer kendi tavsiyesi varsa metnin altında yazar.Metni sadece üretenden izin alırsa özetleyebilir. Ayrıca düzgün, anlaşılır, sorulması gereken her şeyi soran promptlar üretir.(https://huggingface.co/TURKCELL/Turkcell-LLM-7b-v1)
+
+3-Hipotez metni üretici: Her vazife için hipotez üretir, mantık zinciriyle açıklaması mecburidir.
+4-Kod yazıcı: Üretilen hipotezi kod ile temsil eder. Python önceliklidir.(https://huggingface.co/mistralai/Codestral-22B-v0.1)
+5-Kod düzenleyici: Ana koda bağlanır. Vazifesi ana kodda parametrenin belirlenmesi ihtiyacı hasıl olursa sadece o parametreyi değiştirir. Kodda bir hata görürse söyler. İşi olmadığı zaman kod yazıcının yazdığı kodları teftiş eder.
+6-Ameliyeci: Yazılan hipotez kodlarını bulmacaya uyarlar ve çalıştırır. Bunun dışında vazife verilirse tatbikat işlerini yürütür.
+7-Münkekkit: Her adımı titizlikle inceler, korkusuzca eleştirir. Vazifesi hataları tespit etmektir.Daha iyi yollar bulursa söyler, ama vazifesi değildir. Contexti büyüktür.Münekkitlik yaparken geçmiş mesajları da hatırlar tenkidinde kullanır.Bir diğer vazifesi ise her adımı iyileştirmek için tavsiyeler vermektir.Çeşitli analojiler kurup llm'lere yardımcı olur.
+8-Göz: Multimodal bir llm'dir, ana vazifesi dosya oluşturmak, kaydetmek, silmek, düzenlemek, işlemek gibi işlerdir. (yıldız teknik llava✅)
+9- Vakitçi: Her bulmacaya harcanan süreyi tutar. bunu loglara bakarak yapar. Bulmacaya ayrılan vakit verimsiz olmaya başlamışsa başkana başka bulmacaya geçmemiz gerektiğini söyler.
+
+
+🔴🔴🔴NOT: Llm'ler Rag verirabanı ile beslenecek.Llm sistemimizin her üyesinin attığı mesaj bir chunk olarak belirlenecek.
+🔴🔴🔴NOT: Reasoning kabiliyeti olan modeller önceliklidir.
+🔴🔴🔴NOT: Modeller gpu'ya "lazy loading" usulüyle yani sadece aktif katmanlar yüklenecek.
+🔴🔴🔴NOT: Dsl araması veya dreamcoder ile bir llm birleştirilecek. Dsl araması başlayacak, durdurulması ise llm'in elinde olacak. Llm durdurmya karar verdiğinde oluşan kodu kendisi tamamlayacak.
+ 
+1. P100 (16 GB VRAM)
+	•	2016 çıkışlı, yaşlı ama hâlâ iş gören bir kart.
+	•	16 GB VRAM sayesinde 7B modeller (Mistral-7B, LLaMA-2–7B) float16 ile bile sıkış sıkış çalışır.
+	•	13B modeller için ise 8-bit quantization şart, yine de VRAM duvara dayanır. Çoğu zaman inference mümkün, fine-tuning zor.
+
+⸻
+
+2. T4x2 (2×16 GB = 32 GB VRAM toplam)
+	•	İki tane Tesla T4 var ama VRAM birleşmez. Yani model tek GPU’ya yüklenmek zorunda.
+	•	Bu durumda her bir T4 yine 16 GB sınırında kalır. 7B quantized çok rahat, 13B için belki şansını denersin ama garanti değil.
+	•	Çok GPU’nun avantajı burada distributed training (dağıtık eğitim) yapabilmek, ama Kaggle’da o ekosistemi kurmak çoğu kullanıcı için zahmetli.
+
+⸻
+
+3. TPU v5e-8
+	•	İşte burası başka bir alem. TPU (Tensor Processing Unit) Google’ın kendi silikon canavarı.
+	•	v5e-8, sekiz çekirdekli bir TPU pod slice demek. Bellek 128 GB HBM civarında, hız CUDA’dan farklı ama devasa.
+	•	30B modelleri bile inference için çalıştırabilirsin. Fine-tuning de yapılır ama TensorFlow veya JAX ekosistemi lazım, PyTorch uyumu hâlâ eksik. Yani yazılım tarafında alışkanlık değiştirmen gerek.
+
+⸻
+
+
+
+⸻
+
+Net Tavsiye
+	•	En stabil ve kolay kullanım için: 7B modeller → T4, P100.
+	•	13B modelleri denemek için: L4 (24 GB) en tatlısı.
+	•	30B ve üstü için: TPU v5e-8 (ama kod ekosistemini öğrenmen lazım).
+	•	Fine-tuning yapacaksan: LoRA ile 7B veya 13B, en rahat L4 üzerinde.
+
+⸻
+
+Yani “en fazla ne kadar büyük LLM tavsiye edilir” sorunun cevabı:
+	•	GPU tabanında 13B sınır (L4’te rahat, P100/T4’te zor).
+	•	TPU tabanında 30B’ye kadar açılabilirsin.
+
+⸻
+
+Tek model + ayrı optimizer/state
+
+model = MyNet().to("cuda")
+	•	optimizer_task1 = torch.optim.Adam(model.parameters())
+	•	optimizer_task2 = torch.optim.Adam(model.parameters())
+
+Multi-head model
+
+class MultiTaskNet(nn.Module):
+    def __init__(self, backbone, task1_out, task2_out):
+        super().__init__()
+        self.backbone = backbone
+        self.head1 = nn.Linear(backbone_dim, task1_out)
+        self.head2 = nn.Linear(backbone_dim, task2_out)
+
+
+başkan
+haberci,sualci, hafıza ve vakitçi
+Dosya düzenleyici ve ameliyeci
+münekkit
+hipotezci
+kodcu
+
+Llm sisteminde şunu istiyoruz: her llm’e takım arkadaşları sistem talimatında zaten tanıtılacak. Her llm çıktısının kimlerle alakalı olduğunu düşünüyorsa onların ismini promptun başına (llm1, llm2) şeklinde yazacak. Topluluk adları da olacağı için (kodcular, tavsiyeciler…) ve (tüm takım) şeklinde de koyulabilir. Kimin ismi zikredilmişse mesaj doğrudan onlara gidecek.
+
+MİSAL PYTHON KODU:
+⸻
+
+
+import torch
+import torch.nn as nn
+
+# -------------------------
+# Basit Backbone Örneği (placeholder)
+# -------------------------
+class DummyBackbone(nn.Module):
+    def __init__(self, hidden_dim=256):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+        self.fc = nn.Linear(512, hidden_dim)  # girdi boyutu 512, embedding 256
+
+    def forward(self, x):
+        return torch.relu(self.fc(x))
+
+# -------------------------
+# Multi-Head Görev Katmanı
+# -------------------------
+class MultiTaskNet(nn.Module):
+    def __init__(self, backbone, hidden_dim=256, task_heads=None):
+        super().__init__()
+        self.backbone = backbone
+        self.task_heads = nn.ModuleDict()
+        if task_heads:
+            for task_name, out_dim in task_heads.items():
+                self.task_heads[task_name] = nn.Linear(hidden_dim, out_dim)
+
+    def forward(self, x):
+        features = self.backbone(x)
+        outputs = {}
+        for task_name, head in self.task_heads.items():
+            outputs[task_name] = head(features)
+        return outputs
+
+# -------------------------
+# Mesaj yönlendirme (multi-agent)
+# -------------------------
+class TeamRouter:
+    def __init__(self, team_map):
+        """
+        team_map: {"llm1": LLM1_model, "llm2": LLM2_model, ...}
+        """
+        self.team_map = team_map
+
+    def send_message(self, message):
+        """
+        Mesaj formatı: "[alıcı1, alıcı2] Mesaj içeriği"
+        veya "[tüm takım] Mesaj içeriği"
+        """
+        import re
+        pattern = r"\[([^\]]+)\]\s*(.*)"
+        match = re.match(pattern, message)
+        if not match:
+            print("Mesajda alıcı yok, log kanalına gönderiliyor.")
+            return
+        recipients = [r.strip() for r in match.group(1).split(",")]
+        content = match.group(2)
+
+        for r in recipients:
+            if r == "tüm takım":
+                for name, model in self.team_map.items():
+                    self._deliver(name, content)
+            elif r in self.team_map:
+                self._deliver(r, content)
+            else:
+                print(f"{r} bulunamadı, mesaj atlanıyor.")
+
+    def _deliver(self, recipient_name, content):
+        print(f"[{recipient_name}] -> {content}")
+        # Burada model inference yapılabilir
+        # örn: output = self.team_map[recipient_name](input_tensor)
+
+# -------------------------
+# Kullanım Örneği
+# -------------------------
+
+# 1. Takım üyeleri (LLM’ler)
+llm1_model = MultiTaskNet(DummyBackbone(), task_heads={"chat": 256, "memory": 256})
+llm2_model = MultiTaskNet(DummyBackbone(), task_heads={"planner": 256, "qa": 256})
+
+team = {
+    "llm1": llm1_model,
+    "llm2": llm2_model,
+    "kodcular": llm1_model,   # Topluluk örneği
+    "tavsiyeciler": llm2_model
+}
+
+router = TeamRouter(team)
+
+# 2. Mesajlar
+messages = [
+    "[llm1] Merhaba, kod parçasını gözden geçirebilir misin?",
+    "[tüm takım] Toplantı zamanı için fikirlerinizi yazın.",
+    "[kodcular, tavsiyeciler] Bu strateji önerisi önemli."
+]
+
+# 3. Mesaj yönlendirme
+for msg in messages:
+    router.send_message(msg)
+
+
+⸻
+
+⚡ Açıklamalar:
+	1.	MultiTaskNet: Tek backbone üzerinden birden fazla görev (head) çalıştırıyor.
+	2.	DummyBackbone: Gerçek LLM yerine örnek bir linear katman, VRAM dostu. Gerçek kullanım şartnamemizde yazılıdır.
+	3.	TeamRouter: Mesaj başındaki etiketleri parse ediyor ve ilgili LLM’e veya topluluklara yönlendiriyor.
+	4.	Topluluk: Kodcular, tavsiyeciler gibi isimler de tek modelle eşleştirilebilir.
+	5.	tüm takım: Tüm LLM’lere mesaj gönderiyor.
+
+⸻
+Ah, anladım: senin istediğin şey Kaggle Notebook içinde bir hücre çalışırken, aşağıdaki hücrelerin “boşu boşuna sırada beklemesini” engellemek, yani paralel veya asenkron çalışma yapmak. 🧵
+
+Bunu yapmak için birkaç yöntem var, çünkü Jupyter/Kaggle Notebook normalde tek iş parçacığı (single-threaded) çalışır, her hücre sırasıyla bekler.
+
+⸻
+
+1️⃣ Python threading veya concurrent.futures ile asenkron çalıştırma
+
+import threading
+import time
+
+def uzun_islem():
+    for i in range(5):
+        print("Uzun işlem:", i)
+        time.sleep(1)
+
+# Thread ile çalıştır
+t = threading.Thread(target=uzun_islem)
+t.start()
+
+print("Bu hemen çalışır, uzun işlem arka planda devam ediyor.")
+
+✅ Avantaj: Alt hücreler artık “boşuna beklemez”, notebook serbest kalır.
+⚠️ Dezavantaj: GPU/TPU kullanıyorsak ki kullanıyoruz, dikkat, çünkü çoğu GPU iş parçacığı tek device üzerinde sırayla çalışır.
+
+⸻
+
+2️⃣ concurrent.futures.ThreadPoolExecutor
+
+from concurrent.futures import ThreadPoolExecutor
+import time
+
+def uzun_islem():
+    for i in range(5):
+        print("Uzun işlem:", i)
+        time.sleep(1)
+
+executor = ThreadPoolExecutor(max_workers=1)
+future = executor.submit(uzun_islem)
+
+print("Notebook hücresi serbest, uzun işlem arkada devam ediyor.")
+
+
+⸻
+
+3️⃣ Asenkron hücreler (async/await)
+
+import asyncio
+
+async def uzun_islem():
+    for i in range(5):
+        print("Uzun işlem:", i)
+        await asyncio.sleep(1)
+
+# Bu satırda notebook kilitlenmez
+asyncio.create_task(uzun_islem())
+print("Hemen bu çıktı gelir, uzun işlem arka planda devam ediyor.")
+
+Kaggle Notebook’ta asyncio çoğu zaman sorunsuz çalışır.
+
+⚡ Özet
+	•	Normalde Notebook hücreleri bloklanır (sırayla çalışır).
+	•	Bunu engellemek için:
+	1.	threading.Thread
+	2.	concurrent.futures.ThreadPoolExecutor
+	3.	asyncio.create_task()
+	•	Eğer GPU kullanıyorsak ki kullanıyoruz, paralel GPU işlemleri dikkatle yönetilmeli, aksi takdirde CUDA hata verebilir.
+
+Bu kısım kritik: Kaggle’da GPU veya TPU kullanırken, Python’un threading veya asyncio ile hücreleri paralel çalıştırmak her zaman GPU’nun gerçekten paralel kullanıldığı anlamına gelmez. 
+
+⸻
+
+1️⃣ GPU ve tek device sırası
+	•	CUDA tabanlı GPU’larda (T4, A100, vs.) her model veya tensor işlemi tek device üzerinde sırayla işlenir.
+	•	Yani iki ayrı thread veya async task başlatsan bile, GPU kernel’leri FIFO (First In, First Out) mantığıyla sıraya girer.
+	•	Örnek:
+
+# İki farklı thread
+thread1: model1(tensor)
+thread2: model2(tensor)
+
+Burada CPU’daki threadler paralel olsa da, GPU’ya kernel gönderimi sıralı olur → ikinci thread GPU’da bekler.
+
+⸻
+
+2️⃣ Çözüm yolları
+	1.	Multiple GPUs kullanmak
+	•	Kaggle’da genellikle 1 GPU var, ama kendi sunucumuzda 2+ GPU varsa:
+
+model1.to('cuda:0')
+model2.to('cuda:1')
+
+Artık iki thread gerçekten paralel çalışabilir.
+
+	2.	GPU memory management + batching
+	•	Büyük tensörleri tek seferde gönderip asenkron kernel execution kullanabilirsin:
+
+torch.cuda.synchronize()  # GPU işlemlerini eş zamanlı beklemek için
+
+
+	•	Bu sayede CPU serbest kalır ama GPU hala tek device sıralı.
+
+	3.	CPU-only işlemleri arka plana atmak
+	•	Eğer GPU-intensive işlemler varsa, diğer IO veya ön işleme adımlarını CPU thread’inde çalıştır.
+
+⸻
+
+3️⃣ Özet
+	•	Thread veya async sadece CPU tarafını serbest bırakır, GPU üzerinde işlemler tek device’da sırayla devam eder.
+	•	Gerçek paralellik istiyorsak birden fazla GPU veya farklı device kullanımı gerekir.
+	•	Kaggle gibi tek GPU ortamında, hücreleri paralel çalıştırmak GPU bottleneck’i tamamen çözmez, sadece Notebook kilitlenmesini önler.
+NOT: GPU Vram'inin kapasitesi dikkate alınmalıdır.
+
+
+Açık kaynak bir modelle sohbet edilirken bağlam penceresi genişledikçe modelin vram’de kapladığı saha artar. Lakin bu kötü bir şey. Aksi yani hiçbir şey hatırlamamak çok daha feci bir şey. Bu yüzden modelin hatırlaması gereken context her seferinde yeni bir vektör dosyası olarak muhafaza edilip diske yazılsın. Her çıktı dosyası alakalı olduğu işle isimlendirilsin. Yeni prompt geldiğinde hatırlanması gereken mevzular (mevzu1, 2…) gibi ifade edilsin ve o isimlere göre diskteki dosyalar hesaplamaya dahil edilsin.
+Aslında custom bir RAG (Retrieval-Augmented Generation) sistemi tarif ediyorum ama biraz farklı — normalde RAG tüm eski context’i diskte saklar, ben ise her context parçasını ayrı bir dosya halinde vektörleştirip kaydetmek istiyorum.
+Böylece:
+	•	VRAM şişmez (çünkü modelin context penceresi genişlemez, eski şeyler doğrudan modele yüklenmez).
+	•	Her mevzu (konu) kendi embedding dosyasıyla diskte durur.
+	•	Yeni prompt geldiğinde sadece ilgili mevzular diskte aranır, onlar yeniden yüklenip modele beslenir.
+
+⸻
+
+📌 Sistem Akışı
+	1.	Yeni context geldi → embedding çıkarılır → dosya olarak kaydedilir.
+	•	Dosya ismi: mevzu1.npy, mevzu2.npy …
+	•	İçinde: embedding vector (numpy array).
+	2.	Yeni prompt soruldu → prompt içinde (mevzu1, mevzu3) gibi çağrı varsa → diskteki mevzu1.npy, mevzu3.npy okunur.
+	3.	Okunan embedding’ler → yeniden LLM’e verilmeden önce en alakalı cümleler bulunur (cosine similarity vs.).
+	4.	LLM’e verilen son prompt = Kullanıcı sorusu + seçilen mevzuların özetlenmiş/geri getirilen parçaları.
+
+⸻
+
+📌 Python Misal Kod
+import os
+import numpy as np
+from sentence_transformers import SentenceTransformer, util
+
+# Embedding modeli (küçük VRAM dostu)
+embedder = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+
+# Embeddingleri saklayacağımız klasör
+os.makedirs("mevzular", exist_ok=True)
+
+def save_context_as_vector(text, name):
+    # Embedding çıkar
+    vec = embedder.encode([text])[0]
+    # npy olarak kaydet
+    np.save(f"mevzular/{name}.npy", vec)
+    print(f"[+] {name}.npy diske yazıldı.")
+
+def load_vectors(names):
+    vectors = {}
+    for n in names:
+        path = f"mevzular/{n}.npy"
+        if os.path.exists(path):
+            vectors[n] = np.load(path)
+        else:
+            print(f"[!] {n}.npy bulunamadı.")
+    return vectors
+
+def retrieve_relevant(prompt, vectors, top_k=1):
+    prompt_vec = embedder.encode([prompt])[0]
+    results = []
+    for name, vec in vectors.items():
+        score = util.cos_sim(prompt_vec, vec)
+        results.append((name, float(score)))
+    results.sort(key=lambda x: x[1], reverse=True)
+    return results[:top_k]
+
+# ----------------- ÖRNEK -----------------
+# Yeni contextleri kaydedelim
+save_context_as_vector("İstanbul'un fethi 1453 yılında oldu.", "mevzu1")
+save_context_as_vector("Python ile asenkron programlama asyncio kütüphanesi ile yapılır.", "mevzu2")
+
+# Yeni prompt geldi
+prompt = "Fatih Sultan Mehmet hangi yılda İstanbul'u fethetti?"
+mevzular = load_vectors(["mevzu1", "mevzu2"])
+sonuclar = retrieve_relevant(prompt, mevzular)
+
+print("En alakalı mevzular:", sonuclar)
+📌 Bu Sistemin Avantajı
+	•	VRAM hep aynı kalır (LLM context şişmez).
+	•	Disk üzerinde modüler hafıza olur: hangi mevzu çağrılırsa sadece o yüklenir.
+	•	Kaynak tüketimi düşük → Kaggle gibi sınırlı ortamlarda çalışır.
+	•	Hatta istersek embedding’leri FAISS, Milvus veya Weaviate gibi DB’ye atıp daha büyük hafıza kurabiliriz.
+
+Bu kod:
+	1.	Metin parçalarını embedding’lere çevirir,
+	2.	Hem .npy dosyasında saklar,
+	3.	Hem de FAISS indeksine yükler,
+	4.	Sorgu geldiğinde en yakın embedding’i bulup getirir.
+# ======================
+# Gerekli kütüphaneler
+# ======================
+import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer
+
+# ======================
+# 1. MODEL YÜKLEME
+# ======================
+# Küçük, hızlı ve Kaggle'da sorunsuz çalışan bir embedding modeli
+model = SentenceTransformer("all-MiniLM-L6-v2")  
+
+# ======================
+# 2. METİN PARÇALARINI EMBEDDING’E ÇEVİRME
+# ======================
+texts = [
+    "Osmanlı tarihinde Kanuni Sultan Süleyman dönemi en parlak çağdır.",
+    "Python programlama dili veri bilimi için çok uygundur.",
+    "Yapay zekâ ile doğal dil işleme günümüzün en önemli araştırma alanıdır."
+]
+
+embeddings = model.encode(texts)   # embeddings: numpy array [N x D]
+print("Embedding boyutu:", embeddings.shape)
+
+# ======================
+# 3. EMBEDDINGLERİ .NPY OLARAK KAYDETME
+# ======================
+np.save("embeddings.npy", embeddings)
+np.save("texts.npy", np.array(texts))  # Metinleri de kaydedelim ki geri çağırabilelim
+
+# ======================
+# 4. FAISS İNDEX OLUŞTURMA
+# ======================
+d = embeddings.shape[1]   # embedding boyutu
+index = faiss.IndexFlatL2(d)  # L2 distance (Öklid mesafesi) kullanıyoruz
+index.add(embeddings)     # Embeddingleri ekle
+
+# İndex'i kaydedelim
+faiss.write_index(index, "faiss_index.bin")
+
+print("Hem .npy hem FAISS index kaydedildi ✅")
+
+# ======================
+# 5. SORGULAMA (QUERY) 
+# ======================
+query = "Hangi padişah Osmanlı'nın en parlak döneminde hüküm sürdü?"
+query_vec = model.encode([query])
+
+# En yakın 2 sonucu getir
+k = 2
+D, I = index.search(query_vec, k)  # D = uzaklıklar, I = index numaraları
+
+print("\nSorgu:", query)
+for rank, idx in enumerate(I[0]):
+    print(f"{rank+1}. {texts[idx]} (Uzaklık: {D[0][rank]:.4f})")
+Çalışma Usulü:
+	1.	np.save ile embeddingler ve metinler .npy dosyasına kaydediliyor → diskte saklanıyor.
+	2.	faiss.IndexFlatL2 ile arama yapılabilecek bir FAISS index oluşturuluyor.
+	3.	Herhangi bir sorgu geldiğinde embedding’ine bakılıp en yakın kayıtlar bulunuyor.
+	4.	Hem .npy hem .bin dosyaları durduğu için tekrar tekrar model çalıştırmaya gerek yok, doğrudan yüklenip kullanılabilir.
+
+⚡ Bu sistem Kaggle’da binlerce satır embedding’i çok hızlı arayabilir.
+Yani her iki usul birleştirilecektir. Ana başlıklar dosyalara isim olarak verilecek, aynı ana başlığa bağlı olanlar 1,2,3 gibi numaralandırılacak, seçilen dosyalarda en alakalı olanlar araması yapılacaktır.
+
+
+Tamam, bunu batch=1’den batch=10’a kadar ve senin verdiğin FlashAttention + GQA + xFormers + 6k sabit context + retrieval context senaryosuna göre yapalım. 🔥
+
+⸻
+
+1️⃣ Varsayımlar
+	•	Sabit context: 6.000 token
+	•	Dinamik retrieval: aktif token sayısı ~2.000 token (KV cache’e eklenecek)
+	•	Precision: FP16 (2 byte)
+	•	FlashAttention + GQA + xFormers optimizasyonları zaten hesaba katılacak
+	•	Overhead: ~%20 düşmüş hali (xFormers)
+	•	KV memory optimizasyon katsayısı: 0.45 (FlashAttention + GQA)
+	•	GPU VRAM: 96 GB
+
+⸻
+
+2️⃣ KV memory hesaplama
+
+Token başına KV memory (GB/token) = (raw KV GB × 0.45) / tokens
+	•	Önceki hesaplara göre toplam KV optimized GB (6k + 2k = 8k token)
+
+Model	KV raw GB 6k	KV optimized GB	KV per token (GB)
+40B	9.9	9.9×0.45=4.46	4.46 / 6000 ≈ 0.000743
+30B	6.86	3.09	0.000515
+22B	4.39	1.98	0.00033
+15B	3.66	1.65	0.000275
+7B	1.46	0.66	0.00011
+
+Toplam token sayısı batch × context:
+	•	Batch=1 → 8k token
+	•	Batch=2 → 16k token
+	•	Batch=10 → 80k token
+
+KV memory batch ile lineer artacak:
+
+KV_\text{batch} = KV\_per\_token × (batch × 8k)
+
+⸻
+
+3️⃣ KV memory batch=1–10 (GB)
+
+Model	batch=1	batch=2	batch=5	batch=10
+40B	0.000743×8k≈5.94	11.88	29.7	59.4
+30B	0.000515×8k≈4.12	8.24	20.6	41.2
+22B	0.00033×8k≈2.64	5.28	13.2	26.4
+15B	0.000275×8k≈2.2	4.4	11	22
+7B	0.00011×8k≈0.88	1.76	4.4	8.8
+
+
+⸻
+
+4️⃣ Weights + Overhead (GB)
+	•	Weights (FP16): 40B=80, 30B=60, 22B=44, 15B=30, 7B=14
+	•	Overhead (xFormers + FlashAttention): 40B=8, 30B=6.4, 22B=4.8, 15B=4, 7B=2.4
+
+⸻
+
+5️⃣ Toplam VRAM batch=1–10 (GB)
+
+\text{VRAM total} = \text{Weights} + \text{KV batch} + \text{Overhead}
+
+Model	batch=1	batch=2	batch=5	batch=10
+40B	80+5.94+8≈93.9	80+11.88+8≈99.9	80+29.7+8≈117.7	80+59.4+8≈147.4 → sığmaz
+30B	60+4.12+6.4≈70.5	60+8.24+6.4≈74.6	60+20.6+6.4≈87	60+41.2+6.4≈107.6 → riskli
+22B	44+2.64+4.8≈51.4	44+5.28+4.8≈54.1	44+13.2+4.8≈62	44+26.4+4.8≈75.2
+15B	30+2.2+4≈36.2	30+4.4+4≈38.4	30+11+4≈45	30+22+4≈56
+7B	14+0.88+2.4≈17.3	14+1.76+2.4≈18.2	14+4.4+2.4≈20.8	14+8.8+2.4≈25.2
+
+
+⸻
+
+6️⃣ Yorum
+	1.	40B model: batch>2’de VRAM 96GB’yi aşıyor, tek GPU’de riskli → CPU offload veya batch küçültmek gerekir
+	2.	30B model: batch=5 rahat, batch=10 riskli → belki FP16 ve KV optimizasyonu ile çalışır
+	3.	22B ve altı: batch=10’a kadar rahat sığar
+	4.	FlashAttention + GQA + xFormers sayesinde KV memory ve overhead ciddi düştü, normal attention kullanılsaydı batch>1 zaten imkânsız olurdu
+
+⸻
+
+İstersen bir sonraki adımda bunu tek bir tabloya batch=1…10 arası tüm modeller için renk kodlu (yeşil=sığar, kırmızı=sığmaz) olarak çıkarayım, görselleştirmek kolay olur.
+
+Bunu çıkarayım mı?

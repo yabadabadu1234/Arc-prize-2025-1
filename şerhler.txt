@@ -1,0 +1,111 @@
+Şerh:
+
+Hierarchical (Ağaçsal) Tasnif – Agglomerative (Birleştirici) Yaklaşım
+
+Bu yöntem, kümeleri yukarıdan aşağıya değil, aşağıdan yukarıya doğru kurar. Yani başlangıçta her veri noktası (embedding) tek başına bir kümedir (yaprak düğüm).
+
+⸻
+
+1. Başlangıç
+
+Her x_i örneği kendi başına bir küme (veya düğüm) olarak alınır.
+Toplam n veri varsa, başlangıçta n adet küme vardır.
+
+⸻
+
+2. Birleştirme Adımı
+
+Her adımda en yakın iki küme (C_i ve C_j) bulunur.
+Bu iki küme birleştirilir ve yerlerine yeni bir küme konur.
+Bu işlem, tek bir küme kalana kadar sürer.
+
+⸻
+
+3. Mesafe Ölçüleri
+
+Kümeler arasındaki uzaklık, çeşitli şekillerde ölçülür:
+	•	Euclidean (Öklid Mesafesi):
+\|x - y\|_2 = \sqrt{\sum_k (x_k - y_k)^2}
+	•	Cosine (Kosinüs Benzerliği):
+1 - \frac{x \cdot y}{\|x\|\|y\|}
+	•	Ward’s Linkage:
+Küme içi varyansı en az artıracak şekilde birleştirme yapılır. Yani her adımda küme içi toplam hata (squared error) en az artacak biçimde kümeler seçilir.
+
+⸻
+
+4. Genel Formül
+
+Kümeler arası mesafenin ortalama bağlantı (average linkage) formu:
+d(C_i, C_j) = \frac{1}{|C_i||C_j|} \sum_{x \in C_i} \sum_{y \in C_j} \| x - y \|_2
+Burada
+	•	|C_i| küme içindeki öğe sayısı,
+	•	x, y ise bu kümelerin içindeki vektörlerdir.
+
+Bu formül, iki küme arasındaki tüm çiftlerin ortalama uzaklığını verir.
+
+⸻
+
+5. Sonuç: Dendrogram
+
+Bütünleşme süreci boyunca hangi kümelerin hangi sırayla birleştiği kaydedilir.
+Bu birleşmeler dendrogram denilen ağaç biçimli bir yapı ile gösterilir.
+
+Dendrogram belirli bir yükseklikten kesilerek istenen sayıda küme elde edilir.
+Kesme seviyesi, küme sayısını veya kümeler arası minimum uzaklığı belirler.
+
+⸻
+
+6. Türkçe Karşılıklar
+	•	Hierarchical Clustering: Ağaçsal Tasnif / Mertebeli Kümeleme
+	•	Agglomerative: Birleştirici
+	•	Linkage: Bağlantı (birleştirme kuralı)
+	•	Dendrogram: Dal Ağacı
+
+⸻
+
+İcmal:
+Bu usûl, verileri benzerlik derecelerine göre mertebeli biçimde birleştirir. Neticede her seviye, farklı çözünürlükte bir kümeleme görünümü sunar.
+
+
+Şerh:
+HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise) — yoğunluk temelli bir tasnif (clustering) metodudur. Temel fikri, örneklerin (embedding’lerin) uzaydaki yerel yoğunluklarına bakarak kümeleri ayırmaktır. Klasik K-Means gibi küme sayısını önceden belirlemez; kümeleri yoğunluk farklarından türetir.
+
+⸻
+
+1. Temel Kaide
+
+Her bir nokta x_i’in bir kümede olup olmaması, etrafındaki yoğunluğa bağlıdır. Bu yoğunluk HDBSCAN’de mutual reachability distance ve core distance kavramlarıyla ölçülür.
+	•	min_cluster_size: Bir kümenin en az kaç elemandan oluşabileceğini belirler.
+	•	min_samples (opsiyonel): Gürültüye (noise) karşı duyarlılığı ayarlar.
+
+⸻
+
+2. Olasılıksal Üyelik
+
+Model her embedding için bir küme üyelik olasılığı tanımlar:
+
+p(x_i \in C_k) = \frac{\text{local\_density}(x_i)}{\sum_j \text{local\_density}(x_j)}
+
+Yani bir noktanın bir kümeye ait olma ihtimali, bulunduğu noktadaki yerel yoğunluğun toplam yoğunluğa oranıdır. Bu, HDBSCAN’in klasik DBSCAN’den farkıdır: DBSCAN katı bir “kümede/diğerinde” ayrımı yaparken, HDBSCAN bulanık (fuzzy) bir üyelik olasılığı üretir.
+
+⸻
+
+3. Gürültü (Noise)
+
+Düşük yoğunluk bölgelerindeki noktalar — yani çevresinde yeterli komşu bulunmayanlar — noise/outlier kabul edilir ve hiçbir kümeye atanmaz. Bu sayede model, doğal olarak kümelenemeyen verileri dışarıda bırakır.
+
+⸻
+
+4. Özet
+
+Özellik	HDBSCAN’de Karşılığı
+Kriter	Yoğunluk (density)
+Parametre	min_cluster_size
+Çıktı	Kümeler + Gürültü noktaları
+Üyelik	Olasılıksal (0–1 arası)
+Avantaj	Kümelerin sayısını otomatik bulur
+
+
+⸻
+
+İstersen aynı formülün Python kodu (örnek embedding setiyle) üzerinden nasıl hesaplandığını da gösterebilirim. İster misin?

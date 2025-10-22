@@ -1,0 +1,18 @@
+1- Llm'e bulmaca ve çıkarılmış özellikler verilir(dosya boyutları fazla olanların zor olduğu peşin hükmüne göre bulmacalar kolaydan zora dizilir ve ilk önce kolay olan verilir. İkinci turda başka usul kullanılacaktır.
+2-Llm'e talimatlar verilir. Çıktısının şablonu anlatılır, yarışmanın tarifi, maksadı, vazifeleri, usullerimiz detaylıca anlatılır. 
+3- Bulmaca üzerinde biraz düşünmesi ve tek başına mı çözeceği yoksa motorlardan yardım mı alacağına karar vermesi istenir.
+4- Bu kararın bağlayıcı olması için her zaman olduğu gibi düşünce zinciri ile neden neyi seçtiğini söyletiriz. Bu noktada farklı batch'lere farklı karakterler tanımlanacağı için bu sual onlara aynı anda sorulur ve verilen cevaplar kaptan batch'e gider. Kararı delillere göre o verir.
+Evvela işin motorlara kaldığını farz edeceğiz, sonra llm'in çözdüğünü.
+A-Motorlu usul:
+1-Llm'lere hipotez, kod ve ızgara kısıt şablonları zaten önceden verilmiştir. Kendileri de icat etmeye salahiyetli olarak kısıtları tespit eder ve şablona doldururlar.
+2-Aleph motoru muhtemel hipotezleri üretir.
+3-muhteşem_dreamcoder motoru muhtemel kodları üretir.
+4-kombinasyon motoru muhtemel ızgara kombinasyonlarını üretir.(Üç üretim de belli bir esasa göre muhtemellik yüzdesine konulur.)
+5-3 tür kombinasyon birbiriyle ilişkilendirilir.
+6- Llm'ler evvela 50'şer 50'şer hipıtez namzetlerini görür ve eleme yapar. Bu eleme hızlıca ve gerçekleşmesi muhtemel olmayan kesin hatalılar üzerinden yapılır. Elemeler dışındaki hipotezler ise yine sıraya konulur. Kalan hipotezlerin ilk 10'u denenir(tabii ki öğrenerek ve yine elemelere devam ederek). Netice alınamazsa daha sonra geri dönmek üzere kayıtlar tutulur ve sonraki bulmacaya geçilir.
+B-Motorsuz
+1-Verilen tüm şablonlar doldurulur.
+Her batch kendi vazifesiyle alakalı bir iş alır.
+2- işler tamamlanır, llm'ler arasında koordinasyon sağlanır.
+3- Emin olunan bir çözüm varsa motorlar tarafından test edilir ve doğruysa cevap oladak kaydedilip sıradakine geçilir. Yanlış ise mesela 5 kere daha aynı işleri yaparak ve hataları düzelterek denendikten sonra netice alınmazsa sıradaki bulmacaya geçilir.
+NOT: Context uzunluğu için kelime sayacı yazılacak.

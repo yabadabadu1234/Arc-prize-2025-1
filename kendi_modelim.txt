@@ -1,0 +1,586 @@
+Muhteşem bir isabet! 🔥
+Gerçekten, neden ille de kosinüs benzerliği (cosine similarity) kullanalım?
+Bu soru, hem vektör uzaylarının geometrik doğasını, hem de LLM retrieval mantığının sınırlarını doğrudan hedef alıyor.
+Cevabı biraz derin ama tamamen açıklayayım; sonra da alternatifleri sıralayayım.
+
+⸻
+
+⚙️ 1. Niçin herkes kosinüs benzerliğini kullanıyor?
+
+Çünkü cosine similarity (Türkçesiyle “kosinüs benzerliği”) vektörler arasındaki açı farkını ölçer:
+
+\text{cos\_sim}(A, B) = \frac{A \cdot B}{||A|| \, ||B||}
+
+Bu da şu anlama gelir:
+	•	Vektörlerin yönü aynıysa = 1
+	•	Ters yönlüyse = -1
+	•	Dikse = 0
+
+Yani vektörlerin uzunluğu değil, yönü önemlidir.
+Embeddings (gömüleme) uzayında da bilgi “yönle” kodlandığı için, bu ölçü mantıklı görünür.
+
+Ama burada ince bir yanlış genelleme var:
+
+Her embedding uzayı, doğrusal açı ilişkisine göre düzenlenmemiş olabilir.
+Yani “benzer anlamlar yakın yönlerde” olmalı diye bir zorunluluk yok!
+
+Özellikle nonlinear veya dense anisotropic embedding’lerde bu varsayım çöker.
+
+⸻
+
+⚠️ 2. Cosine benzerliğinin zaafları
+
+Sorun	Açıklama
+Anisotropi	Büyük dil modellerinin embedding uzayı genellikle yönsel olarak dengesizdir; bazı eksenlerde aşırı yoğunluk olur. Cosine bu farkı saklar.
+Normalize bağımlılığı	Vektörler normalize edilmezse cos benzerliği anlamını kaybeder. Fakat normalize edince de büyüklük bilgisi kaybolur.
+Lineer varsayım	Cosine, doğrusal yön ilişkisini ölçer. Oysa semantik benzerlik doğrusal değil, çoğu zaman manifold eğriliği içerir.
+Uzun context etkisi	Embedding’lerin aşırı uzun cümlelerde yoğunlaştığı (mean pooling etkisi) durumlarda cos sim “herkesi biraz benzer” gösterir.
+
+
+⸻
+
+💡 3. Daha mantıklı alternatifler
+
+🧭 a) Dot Product Similarity
+
+S(A,B) = A \cdot B
+	•	En hızlı ve doğal (Attention mekanizmasında zaten kullanılır).
+	•	Vektör büyüklüğü de hesaba katılır.
+	•	LLM iç hesaplarında cosine değil, dot product kullanılır!
+🟢 Avantaj: GPU’da native destekli.
+🔴 Dezavantaj: Ölçeklenmez; büyük normlu vektörler aşırı baskın olur.
+
+⸻
+
+⚡ b) Euclidean Distance (Öklid Uzaklığı)
+
+d(A,B) = ||A - B||
+Sonra benzerlik = 1 / (1 + d).
+	•	Gerçek geometrik uzaklığı ölçer.
+	•	Kısmen norm bilgisi korunur.
+	•	Yön değil, “konum yakınlığı” temellidir.
+🟢 Avantaj: Küçük varyasyonları sezebilir.
+🔴 Dezavantaj: Yoğun uzaylarda “distance collapse” olur.
+
+⸻
+
+🧠 c) Mahalanobis Distance
+
+d_M(A,B) = \sqrt{(A-B)^T \Sigma^{-1} (A-B)}
+Burada \Sigma kovaryans matrisidir.
+Yani eksenler arasındaki ilişkileri de hesaba katar.
+🟢 Avantaj: Embedding uzayının iç yapısını “öğrenir”.
+🔴 Dezavantaj: Hesaplama pahalı; \Sigma^{-1} dinamik değişir.
+
+⸻
+
+🧬 d) Learned Similarity (Öğrenilmiş benzerlik)
+
+Bir “benzerlik fonksiyonu” parametrelerle öğrenilir:
+S(A,B) = f_\theta(A,B)
+Örneğin küçük bir sinir ağı (2 dense layer) iki embedding alır ve 0–1 arası benzerlik döndürür.
+Bu, retrieval verisiyle finetune edilir.
+🟢 Avantaj: Gerçek semantik ilişkilere uyarlanabilir.
+🔴 Dezavantaj: Eğitimi gerekir, klasik indeksleme (FAISS vs.) bozulur.
+
+⸻
+
+🔮 e) Hyperbolic or Spherical Similarity
+
+Vektör uzayı öklid değil, hiperbolik (Poincaré) uzaydaysa:
+d_H(A,B) = \text{arcosh}\!\left(1 + \frac{2||A-B||^2}{(1-||A||^2)(1-||B||^2)}\right)
+Bu uzaylarda ağaç yapıları, anlam hiyerarşileri daha iyi temsil edilir.
+🟢 Avantaj: Semantik hiyerarşi için mükemmel.
+🔴 Dezavantaj: Hiperbolik embedding üretmek zor.
+
+⸻
+
+🧩 4. Sonuç (ve tavsiye)
+
+Amaç	En uygun benzerlik türü
+Sade semantic retrieval	Dot product (cos yerine)
+Hiyerarşik bilgi / uzun context	Hyperbolic similarity
+Model içi tutarlılık	Mahalanobis
+Gerçek anlam öğrenme	Learned similarity
+GPU hız + pratiklik	Dot product + normalization (xFormers uyumlu)
+
+
+⸻
+
+Yani:
+
+“Cosine” yalnızca ucuz olduğu için değil, lineer yön varsayımına uygun olduğu için seçiliyor.
+Ama senin sistemin retrieval + long-context çalıştığından, dot product + normalization karışımı (veya Mahalanobis benzeri) çok daha isabetli olur.
+
+
+Tamam, çok iyi — sen kâğıt üstünde bile sezgisel olan ama hesapta GPU dostu ve yüksek performanslı bir formül istiyorsun.
+Yani “cosine kadar basit, ama ondan akıllı” bir ölçü.
+O zaman aşağıda üç tane aday vereceğim; birincisi doğrudan önerim olacak, diğer ikisi onun varyasyonu.
+
+⸻
+
+⚡ Önerdiğim formül: “Normalized Dot Distance” (NDD)
+
+Bu formül, hem cosine similarity’nin hızını hem de dot product’ın norm bilgisini birleştirir.
+Üstelik tek satırda hesaplanır ve GPU’da vektörleştirilebilir (yani paralel çalışır).
+
+S(A, B) = \frac{A \cdot B}{\sqrt{(||A||^2 + ||B||^2)/2}}
+
+⸻
+
+🔹 Ne işe yarar?
+	•	Cosine sadece yönü dikkate alır (normları yok sayar).
+	•	Dot product yön + büyüklüğü dikkate alır ama ölçeklenmez.
+	•	Bu formül, aradaki dengeyi kurar:
+	•	Benzer yönler yüksek skor alır.
+	•	Aşırı uzun vektörler cezalandırılır.
+	•	Kısa ama paralel vektörler hakkını alır.
+
+Yani hem mantıklı hem de hesap olarak hafif.
+
+⸻
+
+🔹 Neden mantıklı?
+
+Bir insana anlatır gibi düşünelim:
+
+“İki vektörün benzerliği, onların ne kadar aynı yöne baktığıyla orantılı olmalı;
+ama birinin enerjisi çok fazlaysa (yani uzunluğu büyükse), bu fark da hesaba katılmalı.”
+
+Yani bu formül “açı + enerji” dengesini kurar.
+Tam da semantik retrieval için biçilmiş kaftan.
+
+⸻
+
+🔹 Hesap yükü
+	•	1 tane dot product
+	•	2 tane L2 norm
+	•	1 tane karekök
+Toplam 3–4 basit işlem.
+GPU’da cosine kadar hızlı çalışır (xFormers veya FAISS uyumlu).
+
+⸻
+
+⚙️ Varyasyon 1 — Log-Scaled Similarity
+
+Uzun vektörleri daha yumuşak cezalandırmak istersen:
+S(A,B) = \frac{A \cdot B}{\log(1 + ||A|| \, ||B||)}
+Bu, aşırı büyük normları log ile bastırır, “ölçek bağımlılığını” azaltır.
+
+⸻
+
+⚙️ Varyasyon 2 — Hybrid Distance
+
+Hem uzaklık hem yön bir arada:
+S(A,B) = \frac{A \cdot B}{||A - B|| + 1}
+Bu da şöyle işler:
+	•	İki vektör yakınsa (küçük fark) → paydaya +1 dışında az katkı → skor yüksek
+	•	Uzaksa → büyük fark → skor düşer
+Basit, sezgisel ve normalize etmeye gerek yok.
+
+⸻
+
+🔍 Sonuç tablosu
+
+Formül	Hesap Karmaşıklığı	GPU Uyumu	Sezgisel Anlam	Pratik Performans
+Cosine	Çok düşük	🟢	“Açı benzerliği”	Orta
+Dot Product	Çok düşük	🟢	“Ham güç + yön”	Orta-Yüksek
+Normalized Dot Distance (öneri)	Düşük	🟢	“Yön + büyüklük dengesi”	Yüksek
+Log-Scaled	Orta	🟡	“Ölçek yumuşatma”	Orta
+Hybrid Distance	Orta	🟡	“Yön + uzaklık karışımı”	Orta-Yüksek
+
+
+⸻
+
+🔚 Özetle
+
+En sade, hızlı ve mantıklı formül:
+S(A, B) = \frac{A \cdot B}{\sqrt{(||A||^2 + ||B||^2)/2}}
+
+Yani cosine’in bir “akıllı kuzeni”.
+Anında sezgisel, normalizasyon gerektirmez, retriever’larda doğrudan kullanılabilir.
+Üstelik dot product tabanlı olduğu için FlashAttention tarzı kernel optimizasyonlarıyla da uyuşur.
+
+
+
+Evet, tam olarak öyle. “Uzaklık” dediğim şey iki vektörün birbirinden çıkarılmasıyla başlar.
+Yani x ve y iki vektörse:
+
+x - y = [x_1 - y_1, \; x_2 - y_2, \; x_3 - y_3, \; \ldots, \; x_n - y_n]
+
+Bu fark vektörü, her boyuttaki farkı gösterir.
+Sonra L1 uzaklığı (Manhattan distance) dediğimiz şeyi alırız:
+
+\|x - y\|_1 = |x_1 - y_1| + |x_2 - y_2| + \ldots + |x_n - y_n|
+
+Yani bütün farkların mutlak değerlerini toplayarak iki vektörün birbirine ne kadar uzak olduğunu buluruz.
+Kısaca:
+	•	“Çıkarma” farkı bulur,
+	•	“Mutlak değer” yönü unutturur (yani sadece büyüklüğe bakar),
+	•	“Toplama” da tüm boyutlarda genel farkı ölçer.
+
+Sonra bunu benim önerdiğim şu sade formüle sokuyoruz:
+
+S(x, y) = \frac{1}{1 + \|x - y\|_1}
+
+Bu da fark azaldıkça (yani vektörler benzedikçe) 1’e yaklaşan, fark arttıkça 0’a yaklaşan bir benzerlik değeri üretir.
+Hiç kök, trigonometrik işlem, normlama falan yok — saf fark ölçümü.
+
+İstersen hemen ardından L2 (Öklid) ve kosinüs benzerliğiyle yan yana karşılaştıralım
+
+
+
+Ah, şimdi kafandaki mantığı anladım. 👍
+
+Sen klasik “iki vektörü çıkar → tek bir uzaklık değeri al → benzerlik hesapla” yaklaşımını fazla özetli ve malumat kaybettiren buluyorsun.
+Senin dediğin:
+
+Her boyutu ayrı ayrı değerlendireceğiz, sonra kombinasyonlarla karar vereceğiz.
+
+Bunu şöyle düşünebiliriz:
+
+⸻
+
+1️⃣ Vektör boyutu bazında yakınlık
+
+Vektörler:
+x = [x_1, x_2, …, x_n], \quad y = [y_1, y_2, …, y_n]
+
+Her boyut için bir basit yakınlık ölçelim:
+s_i = f(x_i, y_i)
+
+Örnek basit fonksiyonlar:
+	•	s_i = 1 - |x_i - y_i| / (\max-\min) → normalize edilmiş fark
+	•	s_i = e^{-|x_i - y_i|} → farkı eksponansiyel olarak azaltır
+
+Böylece her boyut ayrı skor taşır, malumat yok olmaz.
+
+⸻
+
+2️⃣ Boyut kombinasyonlarını işlemek
+
+Sonra tüm boyutları tek bir skora indirgemek yerine:
+	•	Toplama / ağırlıklandırma: belirli boyutlar daha kritik → o boyutun skoruna ağırlık ver
+	•	Eleme (thresholding):
+	•	Eğer belirli bir yüzde (mesela %70) boyutta skor düşükse → benzer değil
+	•	Yani sadece genel ortalamaya bakmıyoruz, “kritik boyutlar”a bakıyoruz
+	•	Kombinasyon mantığı:
+	•	Mesela 4 boyutun hepsi eşik üstünde → yüksek skor
+	•	1-2 boyut düşük → orta skor
+	•	3 veya daha fazla boyut düşük → düşük skor
+
+Bu yaklaşım, bilgiyi ortalamaya sıkıştırmadığı için çok daha az malumat kaybı sağlar.
+
+⸻
+
+3️⃣ Avantajlar
+	1.	Yüksek boyutlu embedding’de lokal farkları yakalar
+	2.	Her boyut ayrı önem taşır, kritik boyutlar ihmal edilmez
+	3.	Malumat kaybı minimal → uzun context’te dahi “ince detaylar” korunur
+	4.	GPU dostu: tamamen paralel hesap yapılabilir
+
+⸻
+
+4️⃣ Örnek mantık
+	•	4096 boyutlu embedding
+	•	Her boyut için s_i = e^{-|x_i - y_i|}
+	•	%10’luk en düşük boyutları “ele”
+	•	Kalan skorları normalize edip ortalama → final benzerlik
+
+Böylece hem basit, hem malumatı koruyan, hem de mantıklı bir yaklaşım elde etmiş oluruz.
+
+
+
+LSTM NEDİR?
+
+Tamam — sakince, adım adım ve hiçbir sözcük belirsiz kalmasın diye detaylandırıyorum. Her terimi Türkçeleştirip etimolojisini de ekliyorum. Önce mantığı net anlatacağım, sonra matematiksel akışı ve en sonunda küçük, sayısal bir örnekle işlemi somutlaştıracağım.
+
+Özet (bir paragrafta)
+
+LSTM (Uzun-Kısa Süreli Bellek) her zaman iki tür iş yapar: (1) “hafıza taşı” — hücre durumu C_t ile uzun süreli bilgiyi saklar; (2) “kontrollü aktarım” — üç kapı (forget/unutma, input/giriş, output/çıkış) aracılığıyla hangi bilginin silineceğini, hangisinin ekleneceğini ve hangisinin dışarı verileceğini oranlayarak (0–1 arası) belirler. Kapılar, sigmoid ile karar verir (0 ile 1 arası), yeni aday bilgi tanh ile ölçeklenir; hücre durumu önceki hücre ile yeni adayın ağırlıklı toplamı şeklinde güncellenir. Bu ekleme (additive update) ve kapılı kontrol, uzun zincirlerde gradyanın (eğitim sinyalinin) tükenmesini büyük oranda önler.
+
+⸻
+
+1) Kavramlar, Türkçe karşılık ve etimoloji (kısa)
+	•	LSTM — Uzun-Kısa Süreli Bellek. (İng. Long Short-Term Memory). Amaç: hem uzun hem kısa süreli bağımlılıkları korumak.
+	•	Gate — kapı. (İng. gate = kapı). Burada “ne kadar geçirilsin”i kontrol eden modül.
+	•	Forget gate — unutma kapısı. “Geçmişten neyi tutayım, neyi atayım?”
+	•	Input gate — giriş kapısı. “Yeni gelen bilgiyi ne kadar ekleyeyim?”
+	•	Output gate — çıkış kapısı. “Hücreden dışarı hangi bilgiyi çıkarayım?”
+	•	Cell state C_t — hücre durumu / bellek haznesi. Uzun süreli taşıyıcı.
+	•	Hidden state h_t — gizli çıkış. O anki adımın çıktı/temsilidir.
+	•	Sigmoid \sigma — sigmoid (0–1 arasına sıkıştırıcı). (Latince/İng. sigmoid = s-şeklinde).
+	•	Tanh — hiperbolik tanjant (−1..1 arası). (kısa: tanh).
+	•	Weight (W) — ağırlık (çarpan matrisi).
+	•	Bias (b) — eksik/ayarlayıcı sabit.
+	•	Hadamard product (*) — eleman-eleman çarpım.
+
+(Etimolojiler: istenirse Osmanlıca/Arapça nüanslı alternatifler üretebilirim.)
+
+⸻
+
+2) Mantıksal akış — her adım ne yapar, sade dille
+
+Her LSTM adımı şöyle işler:
+	1.	Girdi al: önceki gizli durum h_{t-1} ve yeni giriş x_t birleştirilir (konkatenasyon). Bu iki bilgi adımın bağlamını verir: geçmiş + şimdi.
+	2.	Unutma kapısı f_t karar verir: önceki hücredeki her boyut için “ne kadarını saklayayım?” — çıktı 0 ile 1 arası. 0 = tamamen unut, 1 = olduğu gibi bırak.
+	3.	Giriş kapısı i_t ve aday \tilde C_t: yeni gelen bilginin ne kadarsı hücreye eklenecek? i_t bunu oranlar; \tilde C_t ise eklenebilecek “yeni içerik”in ham hali (tanh ile −1..1 aralığında).
+	4.	Hücre güncelleme: C_t = f_t * C_{t-1} + i_t * \tilde C_t. Yani önceki hücreden kalan + yeni eklenen. Bu toplama (additive) yolu, uzun vadeli bilginin “lineer” bir kanal üzerinden akmasına izin verir; böylece gradyan akışı korunur.
+	5.	Çıkış kapısı o_t belirler: hücredeki hangi bilgiyi dışarı vereceğiz? h_t = o_t * \tanh(C_t). Çıkış, hücre durumunun tanh ile sınırlandırılmış hali ile kapının oranının eleman-eleman çarpımıdır.
+
+Özet: kapılar karar verir, hücre durumu saklar, çıkış bunu paylaşır.
+
+⸻
+
+3) Matematik (düz ve açık) — her terimin boyutunu da gösteriyorum
+
+Varsayım:
+	•	x_t boyutu = m.
+	•	h_{t-1} boyutu = n.
+	•	[h_{t-1}, x_t] birleşik vektörün boyutu = n+m.
+
+Ağırlık matrisleri ve biaslar:
+	•	W_f şekli: (n, n+m), b_f şekli: (n,) — forget kapısı için.
+	•	Aynı şekilde W_i, b_i (input), W_C, b_C (aday), W_o, b_o (output) her biri (n, n+m) ve (n,).
+
+Adımlar:
+\begin{aligned}
+z_f &= W_f \cdot [h_{t-1}, x_t] + b_f \quad &\text{(boyut: }n\text{)}\\
+f_t &= \sigma(z_f) \quad &\text{(her eleman 0..1)}\\
+z_i &= W_i \cdot [h_{t-1}, x_t] + b_i\\
+i_t &= \sigma(z_i)\\
+z_C &= W_C \cdot [h_{t-1}, x_t] + b_C\\
+\tilde C_t &= \tanh(z_C) \quad &\text{(her eleman −1..1)}\\
+C_t &= f_t \odot C_{t-1} + i_t \odot \tilde C_t \quad &(\odot \text{ = eleman-eleman çarpım})\\
+z_o &= W_o \cdot [h_{t-1}, x_t] + b_o\\
+o_t &= \sigma(z_o)\\
+h_t &= o_t \odot \tanh(C_t)
+\end{aligned}
+
+Her “\odot” işareti eleman-eleman çarpmadır: her boyut kendi oranıyla kontrol edilir.
+
+⸻
+
+4) Neden bu tasarım vanishing-gradient (kaybolan gradyan) sorununu hafifletir?
+
+Kısa cevap: çünkü hücre durumu güncellemesi toplama (additive) içerir, çarpma zinciri değil. Uzun RNN zincirlerinde tek yol ürün (çarpım) olsaydı, küçük katsayıların ardarda çarpımı gradyanı sıfıra sürükler. LSTM’de C_t = f_t * C_{t-1} + … olduğundan C_{t-1} doğrudan toplama yoluyla sonrağe taşınır; forget gate 1’e yakınsa bilgi bozulmaz, 0’a yakınsa unutulur. Bu “kontrollü doğrusal yol” sayesinde geriye doğru bakarken gradyan daha stabil akar.
+
+⸻
+
+5) Küçük sayısal örnek (boyut n=2, m=2) — adım adım hesap
+
+Amaç: işlemlerin nasıl gerçekleştiğini somut göstermek. Yuvarlamalara dikkat ettim.
+
+Verilenler (örnek):
+	•	h_{t-1} = [0.5,\; -0.1]  (boyut 2)
+	•	x_t = [1.0,\; 0.0]        (boyut 2)
+	•	Birleştirilmiş: [h_{t-1}, x_t] = [0.5,\; -0.1,\; 1.0,\; 0.0] (boyut 4)
+
+Ön hesap (öğretici amaçlı basit ağırlıklar seçtim; gerçek ağlarda bunlar öğrenilir):
+	•	W_f\cdot [h,x] + b_f = [1,\; -1] ⇒ z_f=[1,-1]
+→ f_t = \sigma([1,-1]) = [0.731058,\; 0.268942]  (sigmoid(1)≈0.7311, sigmoid(-1)≈0.2689)
+	•	W_i\cdot [h,x] + b_i = [0,\; 1] ⇒ i_t = \sigma([0,1]) = [0.5,\; 0.731058]
+	•	W_C\cdot [h,x] + b_C = [0.5,\; -0.5] ⇒ \tilde C_t = \tanh([0.5,-0.5]) = [0.462117,\; -0.462117]  (tanh(0.5)≈0.4621)
+
+Önceki hücre:
+	•	C_{t-1} = [0.2,\; 0.8]
+
+Hücre güncelleme:
+\begin{aligned}
+C_{t,1} &= f_{t,1} \cdot C_{t-1,1} + i_{t,1} \cdot \tilde C_{t,1}\\
+&= 0.731058 \times 0.2 + 0.5 \times 0.462117\\
+&= 0.146212 + 0.231058 = 0.37727 \approx 0.377
+\end{aligned}
+\begin{aligned}
+C_{t,2} &= f_{t,2} \cdot C_{t-1,2} + i_{t,2} \cdot \tilde C_{t,2}\\
+&= 0.268942 \times 0.8 + 0.731058 \times (-0.462117)\\
+&= 0.215154 - 0.337684 = -0.12253 \approx -0.123
+\end{aligned}
+
+Çıkış kapısı (örnek):
+	•	W_o\cdot [h,x] + b_o = [1,1] ⇒ o_t = \sigma([1,1]) = [0.731058, 0.731058]
+
+Çıkış h_t:
+	•	\tanh(C_{t}) = [\tanh(0.377),\; \tanh(-0.123)] \approx [0.360,\; -0.123]
+	•	h_{t,1} = 0.731058 \times 0.360 = 0.263
+	•	h_{t,2} = 0.731058 \times (-0.123) = -0.090
+
+Sonuç:
+	•	C_t \approx [0.377,\; -0.123] (hücrede saklanan güncel bellek)
+	•	h_t \approx [0.263,\; -0.090] (o adımda dışarı verilen temsil)
+
+Bu hesap, her adımın neden sayısal ve yerinde kontrol gerektirdiğini gösterir: her gate farklı oranda etkiler, hücre hem önceki bilgiyi koruyabilir hem de yeni bilgiyi alabilir.
+
+⸻
+
+6) Eğitilebilirlik ve öğrenme — ağırlıklar nasıl güncellenir?
+	•	Ağırlıklar W_f,W_i,W_C,W_o ve biaslar b_* öğrenilir (training). Backpropagation Through Time (BPTT) ile sekans boyunca gradyanlar geri yayılır ve ağırlıklar güncellenir.
+	•	Kapıların sigmoid çıktıları 0–1 arasında olduğu için, hangi boyutun korunacağı/kaldırılacağı model tarafından öğrenilir.
+	•	Hücredeki additive yol sayesinde gradyanlar daha az zayıflar; bu nedenle uzun bağlamlar öğrenilebilir.
+
+⸻
+
+7) Uygulamada dikkat edilmesi gereken pratik noktalar
+	•	Boyut seçimi (n): çok büyükse hesap ve overfitting, çok küçükse kapasite sorunu.
+	•	Dropout / düzenleme: overfitting’e karşı kullanılmalı.
+	•	Peephole bağlantıları: bazı LSTM varyantları çıkış/giriş/unutma kapısına doğrudan C_{t-1} bağlar; ihtiyaç halinde düşünülür.
+	•	Hafıza ve hız: LSTM sekansların sırayla işlenmesi nedeniyle paralelleştirme sınırlıdır; Transformer’lar paralel için daha uygundur ama LSTM hâlâ zaman serilerinde ve belirli görevlerde güçlüdür.
+
+⸻
+
+8) Kısa özet — her kelime anlaşılmış olsun diye tek cümleyle
+
+LSTM, geçmiş bilgiyi bir hücrede saklar ve üç kapı (unutma, giriş, çıkış) aracılığıyla neyi unutup neyi ekleyeceğini karar vererek hem kısa vadeli hem uzun vadeli bağlamı koruyan, öğrenilebilir ağırlıklarla kontrol edilen bir RNN türüdür; matematiksel mucizesi, hücre güncellemesinin eleman-eleman oranlama + toplama (elementwise gating + additive update) kombinasyonudur ki bu sayede uzun zincirlerde eğitim sinyali tükenmez.
+
+
+
+LSTM’yi inference için yeniden düzenle.
+Harika.
+Şimdi adım adım LSTM’yi “inference” (çıkarım / tahmin) modunda nasıl düzenleyeceğini anlatayım.
+
+Önce kavramı yerli yerine oturtalım, sonra matematiksel sadeleştirmeyi ve ardından kod düzenini vereyim.
+
+⸻
+
+1️⃣ Eğitim (training) ile çıkarım (inference) farkı
+	•	Training (eğitim): modelin ağırlıkları (weights, Osmanlıca “vezneler”) öğrenilir. Geri yayılım (backpropagation through time) yapılır, yani hata geriye doğru aktarılır.
+	•	Inference (çıkarım): artık ağırlıklar sabittir.
+→ Yalnızca ileri geçiş (forward pass) yapılır.
+→ Girdi (örneğin kelime dizisi veya zaman serisi) verilir, modelin çıktısı hesaplanır.
+→ Geri yayılım, gradyan, optimizasyon yoktur.
+
+Bu durumda LSTM yalnızca:
+(h_t, C_t) = f_{\text{LSTM}}(x_t, h_{t-1}, C_{t-1})
+fonksiyonunu uygular.
+Eğitimde “farklılaşabilir” (differentiable) olması önemliydi, çıkarımda yalnızca sayısal geçiş gerekir.
+
+⸻
+
+2️⃣ Çıkarım moduna uyarlama mantığı
+
+Yapılacak şey şu:
+	•	Eğitim kodundan optimizer, loss, fit(), backprop kısımlarını kaldıracağız.
+	•	Yalnızca modelin “forward” kısmını ve predict() işlemini tutacağız.
+	•	Her girişte modelin gizli durumlarını (h, C) muhafaza edeceğiz; böylece adım adım tahmin üretilebilir.
+	•	Eğer bir cümle üreteceksek, her kelime çıktısını bir sonraki adıma giriş olarak vereceğiz.
+
+⸻
+
+3️⃣ Matematiksel sadeleştirme
+
+LSTM çıkarımda hâlâ aynı denklemleri kullanır:
+
+\begin{aligned}
+f_t &= \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)\\
+i_t &= \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)\\
+\tilde{C}t &= \tanh(W_C \cdot [h{t-1}, x_t] + b_C)\\
+C_t &= f_t * C_{t-1} + i_t * \tilde{C}t\\
+o_t &= \sigma(W_o \cdot [h{t-1}, x_t] + b_o)\\
+h_t &= o_t * \tanh(C_t)
+\end{aligned}
+
+Ama fark şudur:
+	•	W_, b_ sabittir (eğitimde güncellenmez).
+	•	Sadece h_t ve C_t ardışık olarak taşınır.
+	•	Genellikle “tek örnek / tek zaman adımı” modunda çalışır.
+
+⸻
+
+4️⃣ Python’da inference düzeni (manuel hesapla)
+
+Aşağıda, Keras gibi ağır framework’ler kullanmadan, doğrudan Numpy ile “tek adımlık çıkarım”ı gösteren örnek:
+
+import numpy as np
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def tanh(x):
+    return np.tanh(x)
+
+class LSTMCellInference:
+    def __init__(self, input_dim, hidden_dim, weights):
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.W_f, self.W_i, self.W_C, self.W_o, \
+        self.b_f, self.b_i, self.b_C, self.b_o = weights
+
+    def step(self, x_t, h_prev, C_prev):
+        concat = np.concatenate((h_prev, x_t))
+        f_t = sigmoid(np.dot(self.W_f, concat) + self.b_f)
+        i_t = sigmoid(np.dot(self.W_i, concat) + self.b_i)
+        C_tilde = tanh(np.dot(self.W_C, concat) + self.b_C)
+        C_t = f_t * C_prev + i_t * C_tilde
+        o_t = sigmoid(np.dot(self.W_o, concat) + self.b_o)
+        h_t = o_t * tanh(C_t)
+        return h_t, C_t
+
+🧩 Bu kod yalnızca ileri geçiş yapar.
+	•	Girdi: x_t, h_{t-1}, C_{t-1}.
+	•	Çıktı: h_t, C_t.
+	•	“weights” kısmı önceden eğitilmiş modelden alınır (örneğin .h5 dosyasından).
+
+⸻
+
+5️⃣ Eğer Keras modeliyle çıkarım yapılacaksa
+
+Keras’ta eğitim kodunu sadeleştiriyoruz:
+
+# Eğitim kısmı bittiğinde
+trained_model.save("lstm_model.h5")
+
+# Çıkarım tarafında:
+from tensorflow.keras.models import load_model
+model = load_model("lstm_model.h5")
+
+# Sadece tahmin
+input_seq = tokenizer.texts_to_sequences(["Hello there"])
+padded_seq = pad_sequences(input_seq, maxlen=max_length-1, padding='pre')
+
+# Predict (çıktı olasılıkları)
+pred = model.predict(padded_seq)
+predicted_index = np.argmax(pred, axis=1)[0]
+predicted_word = tokenizer.index_word[predicted_index]
+
+Burada modelin predict() metodu zaten inference modunda çalışır.
+	•	Dropout’lar devre dışıdır.
+	•	Geri yayılım yapılmaz.
+	•	Sadece ileri geçiş hesaplanır.
+
+⸻
+
+6️⃣ LSTM’de çıkarım modunda hız optimizasyonları
+	•	Batch size = 1: çünkü tek örnek üzerinde tahmin yapılır.
+	•	Stateless / stateful farkı:
+	•	Stateful=True model, her adımda iç durumlarını (h, C) saklar ve devam eder → sekanslı çıkarım.
+	•	Stateful=False model, her predict()’te sıfırdan başlar → kısa girdi tahmini.
+	•	GPU kullanımı: ileri geçiş, özellikle uzun sekanslarda GPU’da 5–10 kat hızlıdır.
+
+⸻
+
+7️⃣ Somut örnek (tek cümle üretimi)
+
+Diyelim elimizde "Hello" kelimesi var ve 10 kelimelik bir tahmin istiyoruz:
+
+seed_text = "Hello"
+for _ in range(10):
+    token_list = tokenizer.texts_to_sequences([seed_text])[0]
+    token_list = pad_sequences([token_list], maxlen=max_length-1, padding='pre')
+    predicted = np.argmax(model.predict(token_list), axis=1)[0]
+    output_word = tokenizer.index_word[predicted]
+    seed_text += " " + output_word
+
+Bu döngüde:
+	•	Her seferinde son çıktı bir sonraki giriş olur.
+	•	Modelin ağırlıkları hiç değişmez.
+	•	Bu yüzden bu tamamen “inference modunda LSTM”dir.
+
+⸻
+
+8️⃣ Özet (kısa ve sade)
+
+Bir LSTM’yi inference için yeniden düzenlemek demek:
+	1.	Eğitim parametrelerini sabitlemek (artık güncelleme yok),
+	2.	Sadece ileri geçiş formüllerini kullanmak,
+	3.	Girdi → x_t, geçmiş durumlar → h_{t-1}, C_{t-1},
+	4.	Çıktı → yeni durumlar h_t, C_t + gerekirse olasılık tahmini.
