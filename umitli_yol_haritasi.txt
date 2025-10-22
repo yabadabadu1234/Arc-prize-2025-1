@@ -1,0 +1,224 @@
+ARC PRIZE 2025 BULMACA ÇÖZME YARIŞMASI - ŞİRKET SEVİYESİ YOL HARİTASI (TXT FORMATI)
+Proje Adı: ARC PRIZE 2025 Çözüm Motoru Geliştirme (Maksimalist Versiyon)
+Belge Tipi: Profesyonel Kodlama Yol Haritası (Adım Adım Kaggle Notebook Yapısı)
+Amaç: Verilen bulmaca dosyalarındaki (ızgara, renk, sayı vb. elemanlar) her görevi en yüksek doğrulukla çözebilecek, şirket seviyesinde üretim kalitesinde, ayrıntılı ve bütüncül bir yapay zeka (LLM, motor) sistemi oluşturmak.
+Toplam Adım Sayısı Hedefi: 500+ (Minimum 100)
+FAZ 1: ALTYAPI VE VERİ ANALİZİ (ADIM 1-50)
+Bölüm 1: Proje Kurulumu ve Çevre Hazırlığı (Adım 1-10)
+ 
+
+* Gerekli tüm Python kütüphanelerinin (NumPy, Pandas, Matplotlib, scikit-learn, özel Görüntü İşleme/Grafik kütüphaneleri) listelenmesi ve kurulumu (requirements.txt).
+ * Kaggle Notebook'un başlatılması ve temel konfigürasyon (GPU/TPU kullanımı, dosya yolları).
+ * Proje klasör yapısının oluşturulması (data/, notebooks/, src/, models/, submissions/).
+ * ARC veri setinin (training, evaluation) doğru şekilde yüklenmesi ve dosya yollarının kontrolü.
+ * Temel yardımcı fonksiyonların (helper functions) tanımlanacağı bir modülün (src/utils.py) iskeletinin oluşturulması.
+ * Zaman damgalı (timestamped) loglama fonksiyonunun (geliştirme ve hata ayıklama için kritik) oluşturulması.
+ * Versiyon kontrol mekanizmasının (Git/GitHub) başlatılması ve ilk commit yapılması.
+ * Çekirdek veri yapısı (Grid, Color, Task) için Python sınıflarının (classes) taslağının oluşturulması.
+ * Rastgele bir görevin (task) yüklenmesi ve görselleştirilmesi için basit bir çizim fonksiyonunun yazılması.
+ * Projenin genel mimari akış şemasının (motor, LLM entegrasyon noktaları) metin olarak belirlenmesi.
+Bölüm 2: Kapsamlı Veri Yükleme ve Ön Analiz (Adım 11-25)
+ * Tüm eğitim (training) ve değerlendirme (evaluation) bulmacalarını döngüleyerek yükleyen ana fonksiyonun (load_all_tasks) yazılması.
+ * Her görevin (task) eğitim ve test örneklerini (örnek-giriş, örnek-çıkış) ayrı ayrı işleyen bir döngü oluşturulması.
+ * Her ızgaranın (grid) temel özelliklerinin çıkarılması (genişlik, yükseklik, piksel sayısı).
+ * Her ızgarada kullanılan benzersiz renklerin (color) listelenmesi.
+ * Her ızgaradaki her bir rengin frekansının (sayısının) hesaplanması.
+ * Eğitim setindeki her görevin ortalama ızgara boyutunun hesaplanması.
+ * Her görevin 'renk değişim matrisi' (input'tan output'a hangi renk hangi renge dönüşüyor) çıkarımı.
+ * Her görev için 'yoğunluk' (non-zero piksel oranı) değişiminin hesaplanması.
+ * Görevleri zorluk, tip veya özellik setine göre etiketlemek için (metadata) temel sınıflandırma kriterlerinin belirlenmesi.
+ * Bir görevin tüm girdi/çıktı örneklerinin (pairs) tek bir görselde yan yana gösterilmesi (görsel doğrulama).
+ * Bulmacalarda rastlanan temel geometrik şekillerin (kare, çizgi, L-şekli vb.) manuel olarak listelenmesi.
+ * Temel renk paletinin (0-9) görselleştirilmesi ve her rengin semantik karşılığının (siyah-boş, kırmızı-hareketli vb.) belirlenmesi.
+ * Gözden kaçabilecek küçük 1x1 veya 2x2 değişim alanlarının tespit edilmesi için bir fonksiyonun yazılması.
+ * Tüm görevlerin toplam boyutu ve özelliklerinin özetlendiği bir Pandas DataFrame'inin oluşturulması.
+ * Hata ayıklama için örnek bulmacaların (en zor, en kolay) hızlı erişim listesinin hazırlanması.
+Bölüm 3: Çekirdek Özellik Çıkarımı (Feature Engineering - Temel Seviye) (Adım 26-50)
+ * Bir ızgaradaki tüm bitişik (contiguous) alanları bulan temel bir bağlantılı bileşenler (connected components) algoritmasının (Flood Fill) uygulanması.
+ * Her bir bitişik alanın boyutunun, şeklinin (bounding box) ve merkez noktasının hesaplanması.
+ * Izgara döndürme (rotasyon) ve yansıtma (simetri) işlemlerinin girdi-çıktı ilişkisini değiştirip değiştirmediğini kontrol eden bir test fonksiyonu.
+ * Izgaranın dikey ve yatay simetri eksenlerinin otomatik olarak bulunması.
+ * Izgara içindeki çizgileri (yatay, dikey, çapraz) tespit eden ve uzunluklarını sayan bir fonksiyon.
+ * Girdi ve çıktı ızgaraları arasındaki basit piksellik farkı (XOR/fark) matrisinin hesaplanması.
+ * Piksellerin çevresindeki 3x3 veya 5x5 komşuluk desenlerini (neighbourhood patterns) çıkaran bir fonksiyon.
+ * Tekrarlayan döşeme (tiling) desenlerinin (örneğin 2x2 bloğun tekrarı) tespit edilmesi.
+ * Temel öznitelikleri (genişlik, yükseklik, renk sayısı, simetri) bir göreve uygulayan ve depolayan Task Metadata sınıfının güncellenmesi.
+ * Giriş ve Çıkış ızgaralarının 'görünüm alanı' (sadece değişen bölge) kutusunun çıkarılması.
+ * Giriş ızgarasından Çıkış ızgarasına hareket eden nesnelerin (objelerin) vektörünü (delta x, delta y) hesaplayan fonksiyon.
+ * Nesnelerin 'sınırları' (boundary) ve 'içi' (interior) olarak ayrıştırılması.
+ * Temel matematiksel işlemlerin (mod alma, toplama, çıkarma) renk ve sayı değerleri üzerindeki etkilerinin test edilmesi.
+ * Bir ızgaranın etrafına çerçeve (border) ekleme veya çıkarma operasyonlarının simülasyonu.
+ * Giriş ızgarasının bir bölümünün (subgrid) Çıkış ızgarasının bir bölümüne eşleşip eşleşmediğini kontrol eden şablon eşleştirme (template matching) denemesi.
+ * Renk paletini bir görevden diğerine haritalama (mapping) fonksiyonunun taslağının oluşturulması.
+ * "Kopyalama" (Copy) veya "Taşıma" (Move) işlemlerinin baskın olduğu görevlerin otomatik tespiti.
+ * Bir görevin girdi-çıktı çiftleri arasındaki 'kuralın değişmezlik' (invariance) özelliklerinin (örneğin renk 5 her zaman 3'e dönüşür) belirlenmesi.
+ * LLM entegrasyonuna hazırlık olarak, çıkarılan her bir özelliğin (renk frekansı, boyut vb.) insan diline çevrilmesi (ör: "Giriş: 5x5, Çıkış: 3x3, Renkler: 1, 3, 8").
+ * Çekirdek Modül Tasarımı: Tüm özellik çıkarma fonksiyonlarının src/feature_extractor.py içine taşınması.
+ * Her görevin tüm eğitim örneklerine (örnek 1, örnek 2, örnek 3...) aynı kuralın uygulanıp uygulanmadığını test eden doğrulama döngüsünün yazılması.
+ * Özellik çıkarma çıktısının bellekte optimize edilmiş bir şekilde depolanması (NumPy dizileri/Pandas DataFrame).
+ * Çok sayıda görev için (100+) özellik çıkarma süresinin optimizasyonu ve kıyaslama (benchmarking).
+ * Özellik vektörlerinin görselleştirilmesi için basit bir dağılım grafiği (örneğin renk sayısı vs. ızgara boyutu) oluşturulması.
+ * Milestone 1 Tamamlandı: Tüm temel veriler yüklendi, ön analiz yapıldı ve çekirdek özellik çıkarma altyapısı kuruldu.
+FAZ 2: KURAL ÇIKARIM MOTORU VE HEURİSTİKLER (ADIM 51-150)
+Bölüm 4: Nesne (Hücre/Bileşen) Seviyesinde İşleme (Adım 51-75)
+ * Nesne Sınıfı: Bulunan her bitişik bileşen (connected component) için Object sınıfının (özellikler: renk, boyut, konum, şekil, sınır pikselleri) tanımlanması.
+ * Bir görevdeki Girdi ve Çıktı nesneleri arasındaki bire bir eşleşmeyi (matching) deneyecek temel bir fonksiyon (örneğin en yakın nesneye eşleme) yazılması.
+ * Nesnelerin bir görevin tüm örnekleri boyunca tutarlı bir şekilde (örneğin 3. en büyük nesne) tanımlanıp tanımlanmadığının kontrolü.
+ * Tek bir nesnenin temel geometrik dönüşümlerle (döndürme 90/180/270, yansıtma) çıktı nesnesine dönüşüp dönüşmediğinin test edilmesi.
+ * İki nesnenin (Girdi A ve Girdi B) birleşerek veya ayrılarak (Çıktı C) yeni bir nesne oluşturduğu görevlerin tespiti (Set Operasyonları).
+ * Nesnelerin içindeki 'delikleri' (holes) veya boşlukları tespit eden topolojik analiz.
+ * Nesneler arası mesafelerin (Euclidean, Manhattan) hesaplanması ve bu mesafelerin kuralı belirleyip belirlemediğinin kontrolü.
+ * Renklerin, nesneler arası hiyerarşi (üst üste binme, derinlik) oluşturup oluşturmadığının kontrolü.
+ * Bir nesnenin etrafındaki boşluğun (background) analiz edilmesi (etrafında kaç birim boşluk var?).
+ * Nesne tabanlı "büyütme/küçültme" (scaling) kuralının tespiti.
+ * Nesnelerin sınır çizgilerinin kalınlığını (stroking) tespit eden bir algoritmanın uygulanması.
+ * Çoklu Nesne İşleme: İki Girdi nesnesinin (A ve B) Çıktı nesnesine (C) dönüşümünde A'nın sınırının B'nin içine kopyalanması gibi karmaşık kuralların denemesi.
+ * Nesnelerin bir ızgara boyunca rastgele veya sistematik (satır/sütun sırasına göre) sıralanıp sıralanmadığının kontrolü.
+ * Nesne merkezlerinin birbirine göre oransal konumlarının (normalleştirilmiş koordinatlar) çıkarılması.
+ * Her nesne için özyinelemeli (recursive) alt ızgara yapısının (nesne kendi içinde bir ızgara mıdır?) kontrolü.
+ * Bir nesnenin 'renk paletinin' başka bir nesnenin rengine dönüşüp dönüşmediğinin tespiti.
+ * Aynı renkli nesnelerin sayısının Girdi'den Çıktı'ya değişip değişmediğinin kontrolü (nesne ekleme/silme).
+ * Girdi ızgarasındaki her nesnenin, Çıktı ızgarasında bir karşılığının olup olmadığını doğrulayan bir raporlama sistemi.
+ * Filtreleme: Belirli bir renk veya boyuttaki nesnelerin tamamen filtrelendiği (silindiği) görevlerin tespiti.
+ * Nesne bazlı 'kopyalama' ve 'yapıştırma' operasyonlarının (belirli bir nesneyi kopyalayıp ızgaranın köşesine yapıştırma) kural olarak denenmesi.
+ * Nesne eşleştirme (Object Matching) algoritmasının, birden fazla olası eşleşme durumunda en iyi hipotezi seçebilmesi için bir puanlama (scoring) mekanizmasının eklenmesi.
+ * Nesnelerin 'desen tekrarı' (örneğin bir satır veya sütun boyunca tekrar etme) özelliğinin analiz edilmesi.
+ * Nesneler arasında 'uzaysal döngü' (spatial looping) kuralının (ızgaranın kenarından çıkan nesnenin karşı kenardan girmesi) tespiti.
+ * Object sınıfına, nesnenin temsil ettiği kuralı (döndürüldü, rengi değişti) depolayacak bir 'rule_applied' alanı eklenmesi.
+ * Milestone 2.1 Tamamlandı: Nesne tabanlı işleme ve eşleştirme altyapısı oluşturuldu.
+Bölüm 5: Kural Çıkarım Motoru (Rule Inference Engine) (Adım 76-110)
+ * Aday Kural Listesi: Bugüne kadar tespit edilen tüm potansiyel kural tiplerinin (Taşıma, Döndürme, Renk Değiştirme, Filtreleme, Set Operasyonu, Büyütme/Küçültme) listelenmesi.
+ * Kural Deneyicisi (Rule Tester): Bir kuralı (ör: "Tüm Kırmızıları Mavi yap") alıp, Girdi ızgarasına uygulayan ve Çıktı ızgarasıyla eşleşme oranını (accuracy) hesaplayan bir fonksiyonun yazılması.
+ * Brute-Force Kural Kombinasyonu Denemesi: Basit kuralların (tek bir renk değişimi, tek bir kaydırma) tüm görev örneklerinde geçerliliğinin otomatik olarak denenmesi.
+ * LLM için Kural Şablonları: İnsan dilinde ifade edilebilecek kural şablonlarının (ör: "[RENK] rengini [RENK]'e çevir", "En büyük nesneyi 90 derece döndür") oluşturulması.
+ * Heuristik 1: Baskın Renk Kuralı: Girdi-Çıktı arasındaki en baskın renk değişiminin (örneğin %90 oranda 2 -> 7 dönüşümü) otomatik olarak kural olarak denenmesi.
+ * Heuristik 2: Sınır İşlemi Kuralı: Girdi ızgarasının sınır pikselleri Çıktı ızgarasının sınır piksellerine eşleşiyorsa, bunun bir 'Çerçeve Ekleme/Çıkarma' kuralı olduğunun varsayılması ve test edilmesi.
+ * Kural Gruplama: Birden fazla kuralın (örneğin Önce Taşıma, Sonra Renk Değiştirme) sıralı olarak denenmesi (pipeline).
+ * Maksimal Kapsama İlkesi: Bir kuralın, görevdeki tüm eğitim örneklerini çözüp çözmediğinin (kapsama %100) kontrol edilmesi.
+ * Minimum Kural İlkesi: Bir görevi çözmek için gereken en az sayıda ve en basit kural setinin bulunması (parsimony).
+ * Aday Çözüm Üretimi: Bir görev için birden fazla kural setinin (hipotez) üretilmesi ve her birine güven (confidence) puanı atanması.
+ * Karmaşık Kural Çıkarımı - Döşeme (Tiling): Girdi ızgarasının daha küçük bir biriminin (ör: 2x2) tüm ızgarayı oluşturup oluşturmadığının tespiti.
+ * Karmaşık Kural Çıkarımı - Izgara Bölme: Izgarayı 4 eşit parçaya bölerek (çeyrekler), her bir çeyrek için ayrı bir kuralın (ör: sol üst döndürüldü) denenmesi.
+ * Renk Paleti Optimizasyonu: Bir görevde kullanılmayan renklerin sıfır olarak kabul edilmesi ve renk listesinin normalize edilmesi.
+ * Gelişmiş Fark Matrisi Analizi: Girdi ve Çıktı arasındaki fark matrisindeki (değişen pikseller) desenlerin (çizgi, kare) aranması.
+ * Hücre İşlem Motoru (Cellular Automata): Her pikselin komşularına göre değiştiği (ör: 3 komşu aynıysa rengi değişir) basit hücresel otomat kurallarının denenmesi.
+ * Kural çıkarım motoru çıktı formatının (JSON veya özel bir kural dili) standartlaştırılması.
+ * Hata Yakalama ve Geri İzleme: Başarısız olan kural denemelerinin neden başarısız olduğunun (örneğin yanlış renk, yanlış konum) loglanması.
+ * Üretilen kuralın, test edilen tüm eğitim çiftlerini %100 doğrulukla çözdüğünü teyit eden katı bir doğrulama modülü.
+ * LLM/Semantik Etiketleme için Girdi: Çıkarılan kuralın (ör: Taşıma (1, 0), Renk (Mavi -> Kırmızı)), insan tarafından okunabilir doğal dile çevrilmesi.
+ * Kural çıkarım sürecindeki her adımın (hangi kural denendi, sonuç ne oldu) loglanması.
+ * Genelleme Yeteneği Testi: Çıkarılan kuralın, görev dosyasındaki tüm eğitim örneklerine uygulanarak genelleme yeteneğinin doğrulanması.
+ * Renk değişim matrisinin sadece değişen piksellere odaklanarak yeniden hesaplanması.
+ * Kural çıkarım motorunun hız ve performansının ölçülmesi (bir görevi çözme süresi).
+ * Çıkarılan kuralların istatistiksel analizinin yapılması (en yaygın kural, en karmaşık kural).
+ * Milestone 2.2 Tamamlandı: Bir görevi çözen aday kural setlerini üretebilen çekirdek Kural Çıkarım Motoru tamamlandı.
+ * Küçük Ayrıntı: 1x1'lik tek bir pikselin bile kaydırılmasını (offset) kural olarak deneyen özel bir alt rutin.
+ * Fark matrisindeki bitişik alanların (değişen pikseller) boyutlarının ve şekillerinin analiz edilmesi.
+ * Kural önceliği mekanizması: Genel kuralların (tüm ızgarayı etkileyen) özel kurallardan (tek bir nesneyi etkileyen) önce denenmesi.
+ * Kural Deneme Optimizasyonu: Bir kural denemesi başarısız olursa, bir sonraki denemenin bu başarısızlıktan ders çıkararak (örneğin yanlış rengi atlayarak) yapılması.
+ * Renklerin palet içindeki sırasının (sayı değeri) bir kuralı ifade edip etmediğinin (örneğin Renk N her zaman Renk N+1'e dönüşür) kontrolü.
+ * Nesne hareket vektörlerinin sadece tamsayılar değil, aynı zamanda göreceli (relative) hareketler (örneğin en yakın nesneye doğru hareket) olarak da denenmesi.
+ * Gelişmiş Geometrik Analiz: Poligonların (çokgenlerin) köşe sayılarının Girdi'den Çıktı'ya değişip değişmediğinin kontrolü.
+ * Izgara piksellerinin 'uzaklık haritasının' (her pikselin en yakın boş/dolu piksele uzaklığı) çıkarılması ve bu harita üzerinde kural aranması.
+   10metrenin ve bu metrenin ızgara üzerindeki desenlerini analiz eden bir fonksiyon.
+ * Milestone 2.3 Tamamlandı: Kural çıkarımında detay seviyesi artırıldı, hataları öğrenme mekanizması eklendi.
+FAZ 3: MİMARİ ENTEGRASYON VE LLM/AI İŞ BİRLİĞİ (ADIM 111-200)
+Bölüm 6: Hata Ayıklama ve Geri Bildirim Döngüsü (Adım 111-130)
+ * Genişletilmiş Loglama: Her görev için, denenen her kuralın, doğruluk puanının ve deneme süresinin saklandığı kapsamlı bir loglama tablosu (DataFrame) oluşturulması.
+ * Hata veren görevlerin (yani %100 çözülemeyenler) otomatik olarak izole edilmesi ve özel bir klasöre kaydedilmesi.
+ * Başarısız çözümler için görselleştirme: Girdi, Beklenen Çıktı ve Tahmin Edilen Çıktı'nın yan yana gösterilmesi.
+ * Tahmin edilen çıktı ile beklenen çıktı arasındaki fark pikselinin renginin ve konumunun loglanması (hata analizi).
+ * İnsan Geri Bildirimi Simülasyonu: Hata piksellerinin 'neden' yanlış olduğunun (ör: "bu pikselin rengi değişmemeliydi, bu bir Taşıma kuralı değil Renk Değişimi olmalıydı") otomatik olarak etiketlenmesi.
+ * Motorun bir kuralı seçerken yaptığı varsayımları (assumptions) listelemesi ve bu varsayımların hatalı olup olmadığını kontrol etmesi.
+ * Düzeltme Modülü: Başarısız bir kurala, otomatik olarak 'yama' (patch) kuralının (ör: "bu ızgarada ek olarak [RENK] pikselleri silindi") eklenmesi ve yeniden denenmesi.
+ * Eğitim setindeki görevin çözümünün basamaklarının (adım adım kural uygulaması) görselleştirilmesi.
+ * Kural çıkarma motorunun 'güven' (confidence) puanını, bir görevin karmaşıklığı ile ilişkilendiren bir metriğin oluşturulması.
+ * Yüksek benzerlik skoruna sahip ancak %100 olmayan kuralların, daha karmaşık kurallarla kombinasyonu için tekrar sıraya alınması.
+ * Görev çözüm akışının dinamik olarak ayarlanması: Eğer ilk 5 denemede çözüm bulunamazsa, arama alanını genişletme (örneğin 2. derece ilişkileri deneme).
+ * Regresyon Testi: Yeni bir kural eklendiğinde, daha önce çözülmüş görevlerin tekrar test edilmesi ve hatasızlığın doğrulanması.
+ * Görev Yeniden Gruplama: Çözülemeyen görevlerin, ortak özelliklere (örneğin yüksek renk sayısı, düzensiz şekiller) göre yeni bir 'zor görevler' kümesine atanması.
+ * Kodun her bir küçük fonksiyonunun birim testlerinin (unit tests) yazılması (src/tests/ klasörünün oluşturulması).
+ * Refactoring (Yeniden Yapılandırma): Kodun okunabilirliğini ve modülerliğini artırmak için Faz 1 ve Faz 2 kodlarının elden geçirilmesi.
+ * Önbellekleme (Caching): Aynı özellik çıkarma işlemlerinin tekrar tekrar yapılmasını önlemek için önbellekleme mekanizmasının uygulanması.
+ * Tüm çekirdek veri yapıları için tip ipuçlarının (type hinting) zorunlu hale getirilmesi (şirket seviyesi kalite).
+ * Notebook'un her bir hücresinin (kodcuk parçasının) bağımsız çalışabilirliğinin kontrolü.
+ * Optimizasyon Raporu: En yavaş çalışan 10 fonksiyonun belirlenmesi ve bunların hızlandırılması için plan yapılması.
+ * Milestone 3.1 Tamamlandı: Hata ayıklama, loglama ve yeniden yapılandırma tamamlanarak kod kalitesi yükseltildi.
+Bölüm 7: LLM (Büyük Dil Modeli) ve Semantik Ajan Entegrasyonu (Adım 131-160)
+ * LLM ile etkileşim için API istemcisi kurulumu ve temel prompt şablonunun (Girdi, Çıktı, Özellikler) oluşturulması.
+ * Özellik Vektörü -> Metin Çevirmeni: Çıkarılan sayısal ve yapısal özelliklerin, LLM'in anlayacağı kısa, özlü metin açıklamalarına dönüştürülmesi.
+ * LLM'e Girdi Hazırlığı: Görev Girdisi, Görev Çıktısı, Çıkarılan Özellikler, Başarısız Kural Denemelerinin özetinin tek bir metin girdisi haline getirilmesi.
+ * LLM Görev 1: Kural Önerisi: LLM'den, verilen metin açıklamasına dayanarak muhtemel 5 kural önerisi (insan dili formatında) istenmesi.
+ * Metin Kuralı -> Kod Çevirmeni: LLM'den gelen doğal dil kuralını (ör: "Her şeyi 90 derece döndür") Kural Çıkarım Motorunun anlayacağı yapılandırılmış kod formatına (JSON/Python nesnesi) dönüştüren bir parser (ayrıştırıcı) yazılması.
+ * LLM önerilen kuralların önceliklendirilmesi (örneğin daha kısa kurala daha yüksek öncelik).
+ * LLM Görev 2: Etiketleme: LLM'den, görevin tipini (ör: "Taşıma/Filtreleme Görevi", "Geometrik Dönüşüm") etiketlemesi istenmesi.
+ * Etiketleme çıktısının, kural çıkarma motorunun arama alanını daraltmak için kullanılması (örneğin Etiket "Taşıma" ise, motor sadece Taşıma kurallarını deneyecek).
+ * LLM Görev 3: Geri Bildirim Açıklaması: Başarısız bir motor çözümünü (Girdi/Beklenen Çıktı/Tahmin), LLM'e göstererek neden başarısız olduğunu insan dilinde açıklamasını isteme.
+ * LLM'in açıklamasını (ör: "Renk 5 yerine 3 kullanılmış") motorun yeniden deneme döngüsüne entegre eden bir mekanizma.
+ * LLM'in ürettiği her önerinin güvenilirliğini (token/log-prob) kontrol eden bir filtre.
+ * Sıfır Çekim (Zero-Shot) Denemesi: LLM'in sadece Girdi ve Çıktı açıklamalarına bakarak ilk kuralı önerme yeteneğinin test edilmesi.
+ * Çoklu Ajan Mimarisi: Motor (Yapısal) ve LLM (Semantik) ajanlarının sırayla birbirine geri bildirim verdiği döngünün tasarlanması (Motor -> LLM -> Motor).
+ * LLM tarafından üretilen kural önerilerinin benzersizliğini (daha önce denenmemiş olması) kontrol eden bir modül.
+ * LLM istemlerinin (prompt) sıcaklık (temperature) ve diğer hiperparametrelerinin optimize edilmesi.
+ * Bağlam Penceresi Optimizasyonu: LLM'e gönderilen bağlam metninin (task tanımı, özellikler) uzunluğunu ve kalitesini dengeleme.
+ * LLM'in başarısız olduğu durumlarda (anlamsız çıktı) otomatik olarak motorun kontrolü ele alması.
+ * Her görev için LLM sorgulama sayısını sınırlayan bir sayaç ve bütçe mekanizması (maliyet kontrolü).
+ * Tüm LLM etkileşimlerinin (girdi, çıktı, süre) ayrı bir veri tabanına (log) kaydedilmesi.
+ * Milestone 3.2 Tamamlandı: LLM ile etkileşim, kural önerisi ve etiketleme entegrasyonu tamamlandı.
+Bölüm 8: Genişletilmiş Çözüm Uzayı Arama (Adım 161-200)
+ * Arama Algoritması: Tek tek kural denemek yerine, A* veya Genetik Algoritma gibi bir arama algoritmasının kural uzayında uygulanması.
+ * Arama algoritması için bir 'durum' (state) tanımı: Mevcut ızgara durumu ve uygulanan kural geçmişi.
+ * Bulmaca Özgün Kuralları: Belirli görevlerde (ör: "çapraz çizgi çizme") görülen ve genelleştirilmesi zor olan kuralların kodlanması.
+ * Matris Operasyonları: Izgaranın matris çarpımı, öteleme (convolution) gibi matematiksel işlemlerle çözülüp çözülmediğinin test edilmesi.
+ * Dinamik Kural Oluşturma: Kural motorunun, kuralı sadece önceden tanımlı listeden seçmek yerine, özellikler arasındaki ilişkileri (ör: \text{boyut} \times \text{renk} = \text{yeni\_boyut}) kullanarak dinamik olarak kural oluşturması.
+ * Çözüm Ağacı (Solution Tree): Bir görevin çözümü için olası kural yollarını (A kuralı -> B kuralı -> Çözüm) gösteren bir ağacın oluşturulması.
+ * Çözüm ağacındaki her dal için olasılık/güven puanının hesaplanması.
+ * Küçük Döngüler (Microliters): 1x1'lik bir pikselin bile komşularının rengine göre değiştiği (LLM'e zor gelen) çok yerel kuralların ayrı bir motorla denenmesi.
+ * Boşluk (Background) Analizi: Siyah (0) rengin, kural içinde bir eleman olarak (boşluk değil) değerlendirildiği durumların tespiti.
+ * Simülasyon Modülü: Bir görevin test girişine (test input) uygulanan kuralın, beklenen çıktıya ne kadar yakın olduğunu görsel olarak simüle etme.
+ * Çözüm Kontrol Listesi: Her görev için, çözümü sunmadan önce kontrol edilmesi gereken 10 maddelik bir kontrol listesi (ör: "Renk 0 boşluk olarak mı kullanılmış?","Tüm nesneler hesaplandı mı?").
+ * Veri Artırma (Data Augmentation): Mevcut eğitim örneklerini döndürerek, yansıtarak veya renklerini değiştirerek yeni eğitim örnekleri oluşturma ve kuralın bu yeni örneklerde geçerliliğini test etme.
+ * Meta Öğrenme (Meta-Learning): Motorun, bir görevin özelliklerine bakarak (meta veri), geçmişte benzer özelliklere sahip görevlerde hangi kural tipinin işe yaradığını tahmin etmesi.
+ * Meta Öğrenme tahmininin, arama algoritması için başlangıç noktası (initial guess) olarak kullanılması.
+ * Kural motorunun başarısız olduğu görevler için 'Uzman Modüllerin' (örneğin sadece döşeme/tiling kurallarına bakan bir modül) çağrılması.
+ * Kaggle Teslim Formatı: Tahmin edilen çıktıların Kaggle'ın istediği formatta (list of lists) doğru şekilde dönüştürülmesini sağlayan kesin bir fonksiyonun yazılması.
+ * Tahmin çıktılarının, hataları en aza indirmek için (örneğin boşluklar yanlış tahmin edilirse) 'post-processing' (işlem sonrası) filtrelerden geçirilmesi.
+ * Her bir görev çözümü için, kullanılan kural setinin ve doğruluk puanının toplu olarak bir 'submission_log.csv' dosyasına kaydedilmesi.
+ * Tüm projeyi baştan sona çalıştıracak (veri yükleme, özellik çıkarma, kural çıkarma, tahmin) ana bir main_solver fonksiyonunun oluşturulması.
+ * Milestone 4.1 Tamamlandı: Genişletilmiş arama, meta öğrenme ve nihai teslimat altyapısı kuruldu.
+FAZ 4: MÜKEMMELİYETÇİ İNCE AYAR VE ÜRETİM KALİTESİ (ADIM 201-500+)
+Bölüm 9: Detaylı Renk, Sayı ve Geometri Analizi (Adım 171-250)
+ * Renklerin sayısal (N+1) veya çift/tek (even/odd) özelliklerinin kural oluşturmada kullanılması.
+ * Bir ızgaradaki her rengin ortalama konumunun (ağırlık merkezi) hesaplanması.
+ * Komşuluk Puanı: Her piksel için komşu piksellerin renkleriyle eşleşme puanının çıkarılması.
+ * Spiral Desen Tespiti: Izgarada saat yönünde veya saat yönünün tersine spiral olarak hareket eden renk/piksel desenlerinin aranması.
+ * Izgaranın ortanca (median) renginin Girdi'den Çıktı'ya değişip değişmediğinin kontrolü.
+ * Renkleri, insan algısındaki benzerliklerine göre gruplayan (örneğin açık/koyu) bir haritalama katmanı.
+ * Sayısal Kural Uygulaması: Girdi ızgarasındaki '1' sayısının, Çıktı ızgarasında '1' sayısından farklı bir miktarı temsil edip etmediğinin (örneğin 1'in 2'ye dönüşmesi) kontrolü.
+ * Fraktal Desenler: Izgara içindeki küçük parçaların, daha büyük parçalarla aynı deseni tekrarlayıp tekrarlamadığının kontrolü.
+ * Belirli bir renge sahip piksellerin, diğer bir renge sahip pikselleri 'örtme' (occlusion) kuralının tespiti.
+ * Izgara Uzantısı: Girdi ızgarasının potansiyel olarak 'küçük bir pencere' olduğu ve asıl ızgaranın daha büyük olduğu varsayımının test edilmesi.
+ * Hücre İşlem Kuralının Genişletilmesi: 5x5 veya daha büyük komşuluk alanlarını dikkate alan hücresel otomat kuralları.
+ * Dönüşüm Matrislerinin Derinlemesine Analizi: Her Girdi pikselinin, Çıktı pikseliyle olan uzaysal ve renk ilişkisinin matris tabanlı çözümü.
+ * Maksimalist Kural Kombinasyonu: En karmaşık görevler için 3 veya daha fazla kuralın sırasıyla uygulanmasının zorlanması.
+ * Negatif Örnekler: Bir kuralın neden doğru kural olmadığını kanıtlayan (negatif örnek) durumların oluşturulması ve bu durumların LLM'e geri bildirim olarak sunulması.
+ * LLM İyileştirmesi: LLM'den gelen kural önerilerinin, Kural Motoru tarafından otomatik olarak düzeltilebilecek (örneğin yanlış renk numarasını düzeltme) şekilde ayarlanması.
+ * Kesinlik Kontrolü: Tahmin çıktısının, test girdisiyle aynı boyut ve geçerli renk aralığında olup olmadığının son kontrolü.
+ * Kod Kalitesi Denetimi: Statik analiz araçları (Pylint, Black) ile kodun şirket standartlarına uygunluğunun zorlanması.
+ * Dokümantasyon: Tüm önemli sınıfların ve fonksiyonların detaylı Docstring (belgeleme) ile yazılması.
+ * Sonuç Raporu: Her görev için hangi Faza (Faz 2 mi Faz 3 mü) ait kuralın çözümü bulduğunu gösteren bir raporun oluşturulması.
+ * Nihai Teslimat Modülü: En iyi 3 kural önerisinin üretilmesi ve bu önerilerin güven puanlarına göre sıralanması.
+(Adım 191 - 500): Bu aralık, yukarıdaki 190 adımda tanımlanan her bir küçük kod parçasının (fonksiyon, sınıf metodu, döngü) ayrıntılı olarak kodlanmasını, test edilmesini, optimize edilmesini ve her bir göreve uygulanarak oluşan hataların tek tek ayıklanmasını temsil etmektedir.
+Örnek Detaylandırma (191-200, adımların geri kalanı bu ayrıntı seviyesindedir):
+ * src/feature_extractor.py içindeki get_connected_components fonksiyonunun kenar durumlar (1x1 ızgara, tümü dolu ızgara) için birim testleri (unit tests) yazılması.
+ * RuleTester sınıfının, Taşıma kuralı uygulandığında tam eşleşme, %90 eşleşme ve %0 eşleşme durumlarını doğru raporladığının teyit edilmesi.
+ * LLMPromptGenerator fonksiyonunun, prompt metninde maksimum token sayısını aşmayacak şekilde metin uzunluğunu dinamik olarak ayarlaması.
+ * ObjectMatcher metodunun, birden fazla nesne eşleştiğinde 'en yakın merkez' kriteri dışında 'en benzer şekil' kriterini de kullanacak şekilde güncellenmesi.
+ * Tüm görevler için Meta Öğrenme veri setinin (görev özellikleri + doğru kural tipi) oluşturulması ve kaydedilmesi.
+ * Hata Yakalama: Sadece bir örnekte değil, tüm eğitim örneklerinde başarısız olan görevlerin otomatik olarak re-analyze listesine eklenmesi.
+ * Performans İzleme: Her 50 görevde bir, toplam çözümleme süresinin loglanması ve %10'dan fazla yavaşlama varsa uyarı verilmesi.
+ * Kural Deneme Bütçesi: Her görev için maksimum 50 kural denemesi sınırı koyulması; bu sınıra ulaşılırsa kontrolün LLM Ajanına devredilmesi.
+ * Final tahmin çıktılarının, hatalı renk kullanımı (0-9 aralığı dışında) için son bir doğruluk kontrolünden geçirilmesi.
+ * Nihai Kaggle Teslim Dosyası Üretimi: Üretilen submission.json dosyasının ARC Prize'ın beklediği şema ile birebir uyumlu olduğunun otomatik olarak doğrulanması.
+(Adım 201 - 500+): Kalan 300+ adım, yukarıdaki 200 adımın gerektirdiği her türlü alt görevi, ince ayarı, optimizasyonu, istisna işlemeyi, kenar durum (edge-case) çözümünü, performans izlemeyi ve sürekli kalite kontrolünü kapsar. Proje, tüm Kaggle hücrelerinin bu detay seviyesinde, ardışık ve mantıksal bir akışla ilerlemesini sağlayacaktır.
+NOT: Bu yol haritası, bir şirketin üretim ortamında talep edeceği düzeyde bir titizlikle hazırlanmıştır. Her adım, bir Kaggle hücresini veya mantıksal bir kod parçasını ifade etmektedir ve projenin bütünlüğünü sağlamak için zorunludur.
